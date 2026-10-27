@@ -136,6 +136,7 @@
     guardGroups: ['A', 'B', 'C', 'D'].map(id => ({ id, name: 'Guardia ' + id, members: [] })),
     dutySelection: { guardGroupId: 'A' },
     mobileAssignments: { matutino: [], vespertino: [] },
+    r1Priorities: {},
     settings: { showDoctors: true, includeGuards: false, includeServiceSupport: true, includeDate: false, excludePostGuard: true, postGuardMode: 'previous', floorR1Reminder: false },
     history: [],
     sourceNotes: [
@@ -144,7 +145,8 @@
       'Un móvil sólo sustituye al fijo emparejado cuando éste está ausente o de postguardia. Los R3 y R4 conservan su médico y aparecen como Rotantes.',
       'Se conservan las actividades de residencia de Quiroz y Leyva, las coberturas de García M. y Beltrán F., y el horario manual de Esquer.',
       'Las ausencias de médicos pueden tener cobertura de cualquier turno. Las ausencias de residentes se aplican a todos sus servicios durante las fechas registradas.',
-      'Las salas QX 1 a QX 6 se asignan por fecha y turno; los médicos de una misma sala aparecen juntos con sus residentes.'
+      'Las salas QX 1 a QX 6 se asignan por fecha y turno. Cada médico conserva su línea y sus residentes; en una misma sala se respeta el orden en que se agregaron.',
+      'El rol de cada R1 puede configurarse por turno en Equipo: servicio o médico de base. Los servicios lo distribuyen entre los médicos disponibles; si el destino no está disponible, queda en Piso.'
     ]
   };
 

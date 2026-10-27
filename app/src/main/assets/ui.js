@@ -186,7 +186,8 @@
     var excluded = !!override.excluded || !assignment;
     var postGuardKeys = new Set((ui.result && ui.result.postGuardExcluded || []).filter(function (person) { return Number(person.grade) <= 2; }).map(function (person) { return engine.personKey(person); }));
     var postGuardResidents = state.settings.excludePostGuard !== false ? residents.filter(function (person) { return Number(person.grade) <= 2 && postGuardKeys.has(engine.personKey(person)); }) : [];
-    var visibleResidents = engine.availableResidents(state, residents, ui.date).filter(function (person) { return state.settings.excludePostGuard === false || Number(person.grade) >= 3 || !postGuardKeys.has(engine.personKey(person)); });
+    var generatedDoctor = (ui.result && ui.result.groups || []).reduce(function (list, group) { return list.concat(group.doctors); }, []).find(function (person) { return person.id === doctor.id; });
+    var visibleResidents = generatedDoctor ? generatedDoctor.residents : engine.availableResidents(state, residents, ui.date).filter(function (person) { return state.settings.excludePostGuard === false || Number(person.grade) >= 3 || !postGuardKeys.has(engine.personKey(person)); });
     var detail = visibleResidents.length ? engine.formatResidents(visibleResidents) : 'Sin residentes disponibles';
     if (assignment && assignment.covering) detail = 'Cubre a ' + doctorLabel(doctor) + ' · ' + detail;
     if (postGuardResidents.length) detail += ' · Postguardia: ' + residentText(postGuardResidents);
@@ -202,7 +203,7 @@
       ['matutino', 'vespertino'].map(function (shift) {
         var doctors = state.doctors.filter(function (doctor) { return doctor.shift === shift; });
         return '<details class="section-accordion" data-detail="team-' + shift + '"><summary>Turno ' + cap(shift) + '</summary><div class="accordion-content"><div class="doctor-list">' + (doctors.length ? doctors.map(renderRosterDoctor).join('') : '<p class="small-caption">Sin médicos en este turno.</p>') + '</div><button class="button soft full space-top" data-action="add-doctor" data-shift="' + shift + '">' + icon('plus') + 'Añadir médico</button></div></details>';
-      }).join('') + renderAbsences() + '</div>';
+      }).join('') + renderAbsences() + renderR1Priorities() + '</div>';
   }
   function titleOptions(current) {
     return '<option value="Dr."' + (current !== 'Dra.' ? ' selected' : '') + '>Dr.</option><option value="Dra."' + (current === 'Dra.' ? ' selected' : '') + '>Dra.</option>';
@@ -211,7 +212,11 @@
     return '<div class="weekly-grid">' + DAYS.map(function (day, index) { return '<label>' + day + '<select name="day' + index + '">' + serviceOptions(schedule[index], true) + '</select></label>'; }).join('') + '</div>';
   }
   function renderRosterDoctor(doctor) {
-    return '<details class="doctor-card roster-card" data-detail="roster-' + h(doctor.id) + '"><summary><span class="avatar">' + h(initials(doctor.name)) + '</span><span class="doctor-summary"><span class="doctor-name">' + h((doctor.title || 'Dr.') + ' ' + doctor.name) + '</span><div class="doctor-sub">' + h(engine.formatResidents(doctor.residents || []) || 'Sin residentes asignados') + '</div></span></summary><div class="doctor-fields"><form class="staff-form" data-form="doctor" data-id="' + h(doctor.id) + '"><div class="form-grid"><label>Tratamiento<select name="title">' + titleOptions(doctor.title) + '</select></label><label>Apellido o nombre<input name="name" value="' + h(doctor.name) + '" required maxlength="90"></label></div>' + weeklyFields(doctor.schedule) + '<div class="actions-end"><button type="button" class="delete-link" data-action="delete-doctor" data-id="' + h(doctor.id) + '">Quitar médico</button><button class="button soft small" type="submit">' + icon('check') + 'Guardar cambios</button></div></form></div></details>';
+    var policies = engine.r1PriorityRoster(state).filter(function (person) { return person.configured[doctor.shift] && !((state.mobileAssignments || {})[doctor.shift] || []).some(function (pair) { return pair.residentKey === person.key; }); });
+    var configured = new Set(policies.map(function (person) { return person.key; }));
+    var residents = (doctor.residents || []).filter(function (person) { return !configured.has(engine.personKey(person)); });
+    policies.filter(function (person) { return person.priorities[doctor.shift][0] === 'doctor:' + doctor.id; }).forEach(function (person) { residents.push({ name: person.name, grade: 1 }); });
+    return '<details class="doctor-card roster-card" data-detail="roster-' + h(doctor.id) + '"><summary><span class="avatar">' + h(initials(doctor.name)) + '</span><span class="doctor-summary"><span class="doctor-name">' + h((doctor.title || 'Dr.') + ' ' + doctor.name) + '</span><div class="doctor-sub">' + h(engine.formatResidents(residents) || 'Sin residentes asignados') + '</div></span></summary><div class="doctor-fields"><form class="staff-form" data-form="doctor" data-id="' + h(doctor.id) + '"><div class="form-grid"><label>Tratamiento<select name="title">' + titleOptions(doctor.title) + '</select></label><label>Apellido o nombre<input name="name" value="' + h(doctor.name) + '" required maxlength="90"></label></div>' + weeklyFields(doctor.schedule) + '<div class="actions-end"><button type="button" class="delete-link" data-action="delete-doctor" data-id="' + h(doctor.id) + '">Quitar médico</button><button class="button soft small" type="submit">' + icon('check') + 'Guardar cambios</button></div></form></div></details>';
   }
   function showAddDoctor(shift) {
     openModal('Añadir médico · ' + cap(shift), '<form id="add-doctor" class="form-stack"><input type="hidden" name="shift" value="' + h(shift) + '"><div class="form-grid"><label>Tratamiento<select name="title">' + titleOptions('Dr.') + '</select></label><label>Apellido o nombre<input name="name" required maxlength="90" placeholder="Ej. López"></label></div>' + weeklyFields(['consulta', 'qx', 'urgencias', 'qx', 'consulta']) + '<button class="button lime full" type="submit">' + icon('plus') + 'Añadir médico</button></form>');
@@ -233,6 +238,21 @@
       '<div class="form-grid"><label>Desde<input type="date" name="start" value="' + h(draft.start || ui.date) + '" required></label><label>Hasta<input type="date" name="end" value="' + h(draft.end || ui.date) + '" required></label></div><label>Motivo (opcional)<input name="note" value="' + h(draft.note) + '" placeholder="Ej. Vacaciones" maxlength="120"></label><button type="submit" class="button soft full">Registrar ausencia</button></form>' + (state.absences.length ? '<div class="absence-list">' + state.absences.slice().sort(function (a, b) { return a.start.localeCompare(b.start); }).map(renderAbsence).join('') + '</div>' : '') + '</div></details>';
   }
 
+  function renderR1Priorities() {
+    var roster = engine.r1PriorityRoster(state);
+    return '<details class="section-accordion r1-priorities" data-detail="r1-priorities"><summary>Rol de R1</summary><div class="accordion-content"><p class="priority-note">Elige un destino por turno. Si no está disponible, el residente pasa a Piso. Se respetan las ausencias, la postguardia y las sustituciones.</p><div class="priority-roster">' + (roster.length ? roster.map(function (resident) {
+      var encoded = h(encodeURIComponent(resident.key));
+      return '<details class="r1-priority-person" data-detail="r1-priority-' + encoded + '"><summary><span class="resident-grade">R1</span><strong>' + h(resident.name) + '</strong></summary><div class="priority-shifts">' + ['matutino', 'vespertino'].map(function (shift) {
+        var configured = resident.configured[shift];
+        var target = configured ? resident.priorities[shift][0] || 'service:piso' : '';
+        var destination = target.indexOf('doctor:') === 0 ? 'doctor' : target;
+        var doctorId = destination === 'doctor' ? target.slice(7) : '';
+        var options = [['', 'Conservar rol actual'], ['service:piso', 'Piso'], ['service:consulta', 'Consulta externa'], ['service:qx', 'Quirófano'], ['doctor', 'Médico de base']];
+        if (destination === 'service:urgencias') options.push(['service:urgencias', 'Urgencias (rol anterior)']);
+        return '<details class="priority-shift" data-detail="r1-priority-' + encoded + '-' + shift + '"><summary>' + cap(shift) + '</summary><form class="form-stack" data-form="r1-priorities" data-key="' + h(resident.key) + '" data-shift="' + shift + '"><label>Destino<select name="destination">' + options.map(function (option) { return '<option value="' + option[0] + '"' + (destination === option[0] ? ' selected' : '') + '>' + option[1] + '</option>'; }).join('') + '</select></label><label class="r1-doctor-field"' + (destination !== 'doctor' ? ' hidden' : '') + '>Médico de base<select name="doctorId"' + (destination === 'doctor' ? ' required' : ' disabled') + '><option value="">Seleccionar médico</option>' + state.doctors.filter(function (doctor) { return doctor.shift === shift; }).map(function (doctor) { return '<option value="' + h(doctor.id) + '"' + (doctor.id === doctorId ? ' selected' : '') + '>' + h(doctorLabel(doctor)) + '</option>'; }).join('') + '</select></label><button class="button soft full" type="submit">' + icon('check') + 'Guardar rol</button></form></details>';
+      }).join('') + '</div></details>';
+    }).join('') : '<p class="small-caption">No hay residentes R1 registrados.</p>') + '</div></div></details>';
+  }
   function allResidents() {
     var map = new Map();
     state.doctors.forEach(function (doctor) { (doctor.residents || []).forEach(function (resident) { map.set(engine.personKey(resident), resident); }); });
@@ -429,7 +449,11 @@
   document.addEventListener('change', function (event) {
     var input = event.target;
     try {
-      if (input.hasAttribute('data-existing-resident')) {
+      if (input.name === 'destination' && input.closest('[data-form="r1-priorities"]')) {
+        var doctorField = input.closest('form').querySelector('.r1-doctor-field');
+        var doctorInput = doctorField.querySelector('select');
+        doctorField.hidden = input.value !== 'doctor'; doctorInput.disabled = input.value !== 'doctor'; doctorInput.required = input.value === 'doctor';
+      } else if (input.hasAttribute('data-existing-resident')) {
         var fields = input.closest('form').querySelector('.resident-add-fields');
         fields.hidden = !!input.value;
         fields.querySelectorAll('input, select, textarea').forEach(function (field) { field.disabled = !!input.value; });
@@ -452,7 +476,7 @@
         state.dailyOverrides[ui.date] = state.dailyOverrides[ui.date] || {};
         var override = state.dailyOverrides[ui.date][doctorId] = state.dailyOverrides[ui.date][doctorId] || {};
         override[field] = value;
-        if (field === 'service') { delete override.operatingRoomPrevious; if (value !== 'qx') delete override.room; }
+        if (field === 'service') { delete override.operatingRoomPrevious; if (value !== 'qx') { delete override.room; delete override.roomOrder; } }
         save(); render();
       } else if (input.id === 'guard-count') changeGroupCount(Number(input.value), false);
       else if (input.dataset.dutyField) {
@@ -481,7 +505,12 @@
     if (!element.reportValidity()) return;
     var form = new FormData(element);
     try {
-      if (element.dataset.form === 'qx-room') {
+      if (element.dataset.form === 'r1-priorities') {
+        var destination = String(form.get('destination') || '');
+        if (!destination) engine.resetR1Priorities(state, element.dataset.key, element.dataset.shift);
+        else engine.setR1Priorities(state, element.dataset.key, element.dataset.shift, [destination === 'doctor' ? 'doctor:' + String(form.get('doctorId') || '') : destination]);
+        save(); render(); toast('Rol de R1 guardado.');
+      } else if (element.dataset.form === 'qx-room') {
         engine.setOperatingRoom(state, { date: ui.date, shift: ui.shift, doctorId: String(form.get('doctorId') || ''), room: Number(element.dataset.room) });
         save(); render(); toast('Médico asignado a la sala.');
       } else if (element.id === 'add-doctor') {

@@ -55,7 +55,7 @@ test('asignar sala lleva al médico a quirófano sólo en esa fecha y conserva s
   assert.equal(roomBoard(state).candidates.find(doctor => doctor.id === 'md-b').currentRoom, 3);
 });
 
-test('dos médicos en la misma sala se publican juntos con residentes únicos y Rotantes una vez', () => {
+test('dos médicos en la misma sala se publican en líneas propias con sus residentes', () => {
   const state = fresh();
   setRoom(state, 'md-a', 1);
   setRoom(state, 'md-b', 1);
@@ -64,10 +64,8 @@ test('dos médicos en la misma sala se publican juntos con residentes únicos y 
   assert.equal(room.room, 'QX 1');
   assert.deepEqual(room.doctors.map(doctor => doctor.id), ['md-a', 'md-b']);
   assert.equal(room.residents.filter(resident => R.personKey(resident) === R.personKey(person('Compartido'))).length, 1);
-  const line = result.text.split('\n').find(line => line.startsWith('QX 1 '));
-  assert.equal(line, 'QX 1 Dr. Alfa / Dra. Beta / Rotantes / Compartido R2 / Ana R1 / Berta R1');
-  assert.equal((line.match(/Rotantes/g) || []).length, 1);
-  assert.equal((line.match(/Compartido R2/g) || []).length, 1);
+  const lines = result.text.split('\n').filter(line => line.startsWith('QX 1 '));
+  assert.deepEqual(lines, ['QX 1 Dr. Alfa / Rotantes / Compartido R2 / Ana R1', 'QX 1 Dra. Beta / Rotantes / Compartido R2 / Berta R1']);
 });
 
 test('las salas ocupadas se ordenan de QX 1 a QX 6 sin importar el orden de asignación', () => {
@@ -101,7 +99,7 @@ test('la unión de residentes de la sala respeta ausencias y postguardia', () =>
   const result = at(state);
   const room = qx(result).rooms.find(room => room.number === 1);
   assert.ok(room.residents.every(resident => resident.grade >= 3));
-  assert.equal(result.text.split('\n').find(line => line.startsWith('QX 1 ')), 'QX 1 Dr. Alfa / Dra. Beta / Rotantes');
+  assert.deepEqual(result.text.split('\n').filter(line => line.startsWith('QX 1 ')), ['QX 1 Dr. Alfa / Rotantes', 'QX 1 Dra. Beta / Rotantes']);
   assert.doesNotMatch(result.text, /Compartido R2|Ana R1|Berta R1/);
 });
 
@@ -121,7 +119,7 @@ test('la cobertura médica usa la sala y el equipo del origen y muestra el nombr
   assert.match(at(state).text, /QX 4 Dra\. Beta \/ Rotantes \/ Compartido R2 \/ Ana R1/);
 });
 
-test('el mismo suplente que ocupa dos plazas en una sala aparece una vez y conserva ambos equipos', () => {
+test('el suplente que ocupa dos plazas conserva cada equipo en su propia línea', () => {
   const state = fresh();
   R.registerAbsence(state, { id: 'alfa-cubierto', personType: 'doctor', personId: 'md-a', coverDoctorId: 'md-b', start: '2026-10-26', end: '2026-10-26' });
   setRoom(state, 'md-a', 1);
@@ -129,9 +127,10 @@ test('el mismo suplente que ocupa dos plazas en una sala aparece una vez y conse
   const result = at(state);
   const room = qx(result).rooms.find(room => room.number === 1);
   assert.deepEqual(room.doctors.map(doctor => doctor.id), ['md-a', 'md-b']);
-  const line = result.text.split('\n').find(line => line.startsWith('QX 1 '));
-  assert.equal((line.match(/Dra\. Beta/g) || []).length, 1);
-  assert.match(line, /Ana R1 \/ Berta R1/);
+  const lines = result.text.split('\n').filter(line => line.startsWith('QX 1 '));
+  assert.equal(lines.length, 2);
+  assert.match(lines[0], /Dra\. Beta.*Ana R1/); assert.doesNotMatch(lines[0], /Berta R1/);
+  assert.match(lines[1], /Dra\. Beta.*Berta R1/); assert.doesNotMatch(lines[1], /Ana R1/);
 });
 
 test('las asignaciones inválidas no alteran el día, los equipos ni las salas previas', () => {

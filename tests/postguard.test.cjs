@@ -60,7 +60,8 @@ test('el apellido y grado son identidades distintas para postguardia', () => {
   state.dailyOverrides['2026-10-26'] = { cerda: { residents: R.parseResidents('García R1, García R4, Pérez R2, Pérez R3, Otro R1') } };
   const result = at(state);
   const cerda = result.groups.flatMap(group => group.doctors).find(doctor => doctor.id === 'cerda');
-  assert.deepEqual(keys(cerda.residents), R.parseResidents('García R4, Pérez R3, Otro R1').map(R.personKey).sort());
+  const relevant = cerda.residents.filter(person => ['García', 'Pérez', 'Otro'].includes(person.name));
+  assert.deepEqual(keys(relevant), R.parseResidents('García R4, Pérez R3, Otro R1').map(R.personKey).sort());
 });
 
 test('los integrantes de la guardia actual siguen disponibles ese día y se resuelven por separado', () => {
