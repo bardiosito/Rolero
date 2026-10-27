@@ -2,7 +2,7 @@
 
 Aplicación Android que prepara el texto del rol matutino y vespertino a partir de las tres imágenes del proyecto. Trabaja sin conexión y guarda los cambios en el teléfono.
 
-El APK de entrega se genera en **dist/Rolero.apk**. La versión actual es **1.3.0** (código **4**), requiere Android 8 o posterior y utiliza la firma de desarrollo local. Para actualizar conservando los datos, instala el APK sobre la versión anterior con la misma firma.
+El APK de entrega está en **dist/Rolero.apk** y su copia versionada idéntica en **dist/Rolero-1.3.0.apk**. La versión actual es **1.3.0** (código **4**), requiere Android 8 o posterior y utiliza la firma de desarrollo local. Para actualizar conservando los datos, instala el APK sobre la versión anterior con la misma firma.
 
 ## Uso
 
@@ -96,7 +96,9 @@ El script Android requiere un **APK debug**, un emulador conectado a ADB y el mi
 
 La revisión nativa incluye cinco casos críticos: conservación de los datos y controles retirados, alta con médicos de ambos turnos y copia desde Crear, ascenso R1 a R2 con referencias conservadas, retiro confirmado al ascender a R3 y persistencia con cierre normal. Para esta última comprobación, verifica el almacenamiento, desconecta Playwright, vuelve a Inicio, espera dos segundos y después detiene y reabre el proceso. Guarda todas las entradas previas en **qa/residents/android-original-state.json** y las restaura al terminar, incluso si falla una prueba. El informe queda en **qa/residents/android-results.json**. Las capturas están desactivadas por defecto; se pueden habilitar con `ROLERO_SCREENSHOTS=1` y son diagnósticos opcionales.
 
-En **1.3.0** pasaron **108 pruebas del motor** y los **11 escenarios de interfaz en navegador**. El informe **qa/residents/ui-results.json** registra `success: true` y las capturas fueron revisadas. Los **5 casos nativos de Android siguen pendientes**. Los informes de esta versión deben identificarla y registrar `success: true`, sin errores de restauración.
+En **1.3.0** pasaron **108 pruebas del motor**, **11 escenarios de interfaz en navegador** y **5 comprobaciones nativas en Android 15 (API 35)**. Los informes **qa/residents/ui-results.json** y **qa/residents/android-results.json** registran `success: true`, sin errores ni fallos de restauración. Las capturas de navegador fueron revisadas y el almacenamiento previo del emulador quedó restaurado íntegramente.
+
+Los APK de entrega y depuración tienen sus firmas verificadas; las **10 comprobaciones de archivos empaquetados** coinciden con las fuentes actuales, según **qa/residents/package-checks.json**. **dist/Rolero-1.3.0.apk** es idéntico a **dist/Rolero.apk**.
 
 Como referencia histórica, en **1.2.0** pasaron **85 pruebas del motor**, **12 escenarios de navegador** y **5 comprobaciones nativas en Android 15 (API 35)**, con los datos previos restaurados. Sus informes están en **qa/compact/** y su prueba de navegador, **tests/ui.compact.smoke.cjs**, corresponde al flujo anterior que incluía Texto del turno en Equipo. Los resultados de **qa/groups/** corresponden a 1.1.0 y los de **qa/android/** al flujo con calendario; ninguno acredita por sí solo la interfaz 1.3.0.
 
