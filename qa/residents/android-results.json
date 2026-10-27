@@ -1,0 +1,21 @@
+{
+  "version": "1.3.0",
+  "schemaVersion": 3,
+  "device": "emulator-5554",
+  "apk": "C:\\Users\\bardiostudio\\Documents\\rolero\\dist\\Rolero-debug.apk",
+  "platform": "Android WebView",
+  "screenshotsEnabled": false,
+  "passed": [
+    "Actualización conserva datos y restringe la edición de residentes a Guardias",
+    "Alta R1 con médicos de ambos turnos, nombre de guardia y copia desde Crear",
+    "Ascender R1 a R2 conserva médicos, rangos, ausencias y referencias móviles",
+    "Ascender R2 a R3 requiere confirmar y elimina sólo las referencias activas",
+    "Guardias, retiros y preferencias persisten con cierre normal y reapertura"
+  ],
+  "errors": [],
+  "diagnostics": [],
+  "currentStep": "",
+  "failure": null,
+  "cleanupErrors": [],
+  "success": true
+}

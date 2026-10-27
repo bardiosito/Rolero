@@ -1,0 +1,21 @@
+{
+  "version": "1.2.0",
+  "schemaVersion": 3,
+  "device": "emulator-5554",
+  "apk": "C:\\Users\\bardiostudio\\Documents\\rolero\\dist\\Rolero-debug.apk",
+  "platform": "Android WebView",
+  "screenshotsEnabled": false,
+  "passed": [
+    "Actualización nativa carga esquema 3 y conserva los campos previos",
+    "Crear permite copiar inmediatamente con grupos vacíos y alternar Piso",
+    "Cobertura muestra al sustituto en ambos servicios y se copia desde Equipo",
+    "Guardias contiene la selección actual y excluye automáticamente la postguardia",
+    "Ausencias y preferencias sobreviven al cierre normal y la reapertura"
+  ],
+  "errors": [],
+  "diagnostics": [],
+  "currentStep": "",
+  "failure": null,
+  "cleanupErrors": [],
+  "success": true
+}

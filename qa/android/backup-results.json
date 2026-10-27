@@ -1,0 +1,10 @@
+{
+  "platform": "Android 15 (API 35)",
+  "exportedBytes": 30254,
+  "doctors": 18,
+  "nativeExportVerified": true,
+  "nativeImportVerified": true,
+  "changedNoteReverted": true,
+  "settingsAndHistoryMatch": true,
+  "doctorNamesAndAccentsMatch": true
+}

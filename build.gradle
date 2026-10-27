@@ -1,0 +1,9 @@
+plugins {
+    id 'com.android.application' version '9.2.1' apply false
+}
+// Keep Gradle clean separate from the manual builder's persistent signing key.
+layout.buildDirectory.set(layout.projectDirectory.dir('build-gradle'))
+tasks.register('clean', Delete) {
+    delete layout.buildDirectory
+    delete subprojects.collect { it.layout.buildDirectory }
+}

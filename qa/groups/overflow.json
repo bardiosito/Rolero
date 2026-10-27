@@ -1,0 +1,34 @@
+[
+  {
+    "tag": "DIV",
+    "id": "",
+    "class": "form-grid",
+    "left": 32,
+    "right": 391,
+    "text": "Residente móvilElegir R1 o R2Móvil Alfa R2Móvil Beta R1Ibarra R2Fijo al que sustituyeElegir resident"
+  },
+  {
+    "tag": "LABEL",
+    "id": "",
+    "class": "",
+    "left": 181,
+    "right": 391,
+    "text": "Fijo al que sustituyeElegir residente fijoMárquez R2 · Dr. MontoyaPérez R2 · Dr. TorresIbarra R2 · D"
+  },
+  {
+    "tag": "SELECT",
+    "id": "",
+    "class": "",
+    "left": 181,
+    "right": 391,
+    "text": "Elegir residente fijoMárquez R2 · Dr. MontoyaPérez R2 · Dr. TorresIbarra R2 · Dra. CerdaChávez R1 · "
+  },
+  {
+    "tag": "BUTTON",
+    "id": "",
+    "class": "button secondary full",
+    "left": 32,
+    "right": 391,
+    "text": "Guardar emparejamiento"
+  }
+]

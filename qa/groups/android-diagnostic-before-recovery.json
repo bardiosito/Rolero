@@ -1,0 +1,25 @@
+{
+  "device": "emulator-5554",
+  "apk": "C:\\Users\\bardiostudio\\Documents\\rolero\\dist\\Rolero-debug.apk",
+  "platform": "Android WebView",
+  "passed": [
+    "estado previo compatible con esquema 2",
+    "inicio nativo con cuatro grupos vacíos y sin calendario mensual",
+    "guardias manuales aceptan R1/R2 y rechazan R3 y más de diez integrantes",
+    "guardia A toma D y el móvil queda en reserva con el fijo disponible",
+    "guardia D toma C y el móvil sustituye al fijo de postguardia",
+    "el móvil R1 sustituye una ausencia de apoyo por servicio",
+    "seis y tres grupos actualizan el ciclo y la reducción requiere confirmación"
+  ],
+  "errors": [],
+  "currentStep": "grupos, guardia seleccionada y emparejamientos sobreviven al cierre del proceso",
+  "failure": {
+    "step": "grupos, guardia seleccionada y emparejamientos sobreviven al cierre del proceso",
+    "message": "Command failed: C:/Users/bardiostudio/AppData/Local/Android/Sdk/platform-tools/adb.exe -s emulator-5554 pull /data/local/tmp/rolero-groups-persistencia.png C:\\Users\\bardiostudio\\Documents\\rolero\\qa\\groups\\android-persistencia.png",
+    "stack": "Error: Command failed: C:/Users/bardiostudio/AppData/Local/Android/Sdk/platform-tools/adb.exe -s emulator-5554 pull /data/local/tmp/rolero-groups-persistencia.png C:\\Users\\bardiostudio\\Documents\\rolero\\qa\\groups\\android-persistencia.png\n    at genericNodeError (node:internal/errors:986:15)\n    at wrappedFn (node:internal/errors:540:14)\n    at checkExecSyncError (node:child_process:943:11)\n    at execFileSync (node:child_process:979:15)\n    at adb (C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:18:10)\n    at screenshot (C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:66:3)\n    at C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:283:13\n    at async check (C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:57:3)\n    at async C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:262:5"
+  },
+  "cleanupErrors": [
+    "Restauración del estado previo: Command failed: C:/Users/bardiostudio/AppData/Local/Android/Sdk/platform-tools/adb.exe -s emulator-5554 shell am start -n mx.rolero.app/.MainActivity\nadb.exe: device offline\r\n"
+  ],
+  "success": false
+}

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123f3b">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Organiza tu equipo, sus guardias y el rol de cada turno.">
+  <title>Rolero · Control de turnos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <a href="#crear" class="brand" data-action="tab" data-tab="crear" aria-label="Rolero, ir a Crear">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M8 8h10a6 6 0 0 1 0 12H8V8Z" stroke="currentColor" stroke-width="3"/><path d="m17 20 7 7M8 20v7M8 13h10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span>
+        <span>rolero<span class="brand-dot">.</span></span>
+      </a>
+      <div class="header-right"><span class="offline-badge"><i></i>Sin conexión</span><button class="icon-button" data-action="tools" aria-label="Respaldo y datos" title="Respaldo y datos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v11m-4-4 4 4 4-4M5 15v5h14v-5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    </header>
+    <main id="app" tabindex="-1" aria-live="off"></main>
+    <footer class="privacy-note"><span aria-hidden="true">⌁</span> Tus datos se guardan en este dispositivo.</footer>
+  </div>
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <button class="nav-item active" data-action="tab" data-tab="crear" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="17" rx="3"/><path d="M8 2v4m8-4v4M4 10h16m-12 5h8m-8 3h5" stroke-linecap="round"/></svg><span>Crear</span></button>
+    <button class="nav-item" data-action="tab" data-tab="equipo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m1-16a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v3" stroke-linecap="round"/></svg><span>Equipo</span></button>
+    <button class="nav-item" data-action="tab" data-tab="guardias"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14a8 8 0 0 1-10-10A8.5 8.5 0 1 0 20 14Z" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 3v5m-2.5-2.5h5" stroke-linecap="round"/></svg><span>Guardias</span></button>
+  </nav>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="modal" class="modal-backdrop" hidden><section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div id="modal-body"></div></section></div>
+  <input type="file" id="backup-file" accept="application/json,.json" hidden>
+  <noscript>Activa JavaScript para usar Rolero.</noscript>
+  <script src="data.js"></script>
+  <script src="engine.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>

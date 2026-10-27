@@ -1,0 +1,25 @@
+{
+  "version": "1.2.0",
+  "schemaVersion": 3,
+  "platform": "Edge headless",
+  "passed": [
+    "Crear compacto: organización cerrada, médicos visibles y acciones inmediatas",
+    "Recordatorio de Piso y edición del texto se copian sin confirmación",
+    "Equipo abre con Texto del turno y turnos cerrados, sin estadísticas ni apoyos editables",
+    "Añadir y quitar médicos conserva el turno elegido",
+    "El último médico también se puede quitar y el equipo vacío persiste",
+    "Cobertura médica conserva la actividad propia del cobertor y hereda residentes",
+    "Cobertor de otro turno aparece sin alterar su rol original",
+    "Ausencia de residente aplica a todas sus asignaciones y sólo al rango de fechas",
+    "Guardias concentra la selección actual y mantiene los grupos cerrados",
+    "Respaldo v3 conserva móviles y campos previos, con migración desde v2",
+    "Migración de esquema v1 conserva el calendario anterior dentro del respaldo",
+    "Diseño sin desbordes de 360 a 1440 píxeles"
+  ],
+  "errors": [],
+  "diagnostics": [],
+  "currentStep": "",
+  "failure": null,
+  "cleanupErrors": [],
+  "success": true
+}

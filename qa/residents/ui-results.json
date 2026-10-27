@@ -1,0 +1,24 @@
+{
+  "version": "1.3.0",
+  "schemaVersion": 3,
+  "platform": "Edge headless",
+  "passed": [
+    "Crear y Equipo dejan la edición de residentes únicamente en Guardias",
+    "Catorce residentes existentes sin guardia y nombre de guardia persistente",
+    "Alta R1 con médicos matutino y vespertino aparece en ambos textos",
+    "Agregar existente conserva todas sus combinaciones y la postguardia usa su grupo",
+    "Asignaciones múltiples se guardan con paneles cerrados y al renombrar",
+    "Ascender R1 a R2 actualiza todas las referencias activas y conserva rangos e historial",
+    "Ascender R2 a R3 exige confirmar y retira sólo los datos activos de esa persona",
+    "Quitar residente cancela o confirma la baja global",
+    "Duplicados y límite de diez rechazan cambios sin pérdida de datos",
+    "Respaldo y recarga conservan asignaciones, ausencias, móviles e historia",
+    "Guardias y formularios de residentes caben entre 360 y 1440 píxeles"
+  ],
+  "errors": [],
+  "diagnostics": [],
+  "cleanupErrors": [],
+  "currentStep": "",
+  "failure": null,
+  "success": true
+}

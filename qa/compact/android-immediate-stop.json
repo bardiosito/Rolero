@@ -1,0 +1,24 @@
+{
+  "version": "1.2.0",
+  "schemaVersion": 3,
+  "device": "emulator-5554",
+  "apk": "C:\\Users\\bardiostudio\\Documents\\rolero\\dist\\Rolero-debug.apk",
+  "platform": "Android WebView",
+  "screenshotsEnabled": false,
+  "passed": [
+    "Actualización nativa carga esquema 3 y conserva los campos previos",
+    "Crear permite copiar inmediatamente con grupos vacíos y alternar Piso",
+    "Cobertura muestra al sustituto en ambos servicios y se copia desde Equipo",
+    "Guardias contiene la selección actual y excluye automáticamente la postguardia"
+  ],
+  "errors": [],
+  "diagnostics": [],
+  "currentStep": "Ausencias y preferencias sobreviven al cierre del proceso",
+  "failure": {
+    "step": "Ausencias y preferencias sobreviven al cierre del proceso",
+    "message": "No persistió settings\n+ actual - expected\n\n  {\n    excludePostGuard: true,\n+   floorR1Reminder: false,\n-   floorR1Reminder: true,\n    includeDate: false,\n    includeGuards: false,\n    includeServiceSupport: true,\n    postGuardMode: 'previous',\n    showDoctors: true\n",
+    "stack": "AssertionError [ERR_ASSERTION]: No persistió settings\n+ actual - expected\n\n  {\n    excludePostGuard: true,\n+   floorR1Reminder: false,\n-   floorR1Reminder: true,\n    includeDate: false,\n    includeGuards: false,\n    includeServiceSupport: true,\n    postGuardMode: 'previous',\n    showDoctors: true\n\n    at C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:187:167\n    at async check (C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:52:3)\n    at async C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:183:5"
+  },
+  "cleanupErrors": [],
+  "success": false
+}

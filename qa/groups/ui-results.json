@@ -1,0 +1,13 @@
+{
+  "passed": [
+    "inicio v2 con cuatro grupos vacíos y sin calendario",
+    "formación manual de guardias sólo R1/R2",
+    "móvil emparejado queda de reserva si el fijo está disponible",
+    "seleccionar guardia D excluye C y activa el sustituto",
+    "móvil cubre una ausencia R1 de apoyo por servicio",
+    "seis grupos y reducción confirmada a tres recalculan el ciclo",
+    "persistencia, respaldo v2 y tamaños de pantalla",
+    "actualización desde respaldo v1 conserva equipo, ausencias e historial"
+  ],
+  "errors": []
+}

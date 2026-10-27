@@ -1,0 +1,11 @@
+{
+  "device": "emulator-5554",
+  "platform": "Android 15 (API 35)",
+  "passed": [
+    "selector nativo Compartir abre y se cancela sin enviar",
+    "Atrás cierra diálogo y vuelve de Equipo a Crear",
+    "cambios sobreviven cierre y reapertura del proceso"
+  ],
+  "errors": [],
+  "currentStep": "selector nativo de respaldo abre y se cancela conservando datos"
+}

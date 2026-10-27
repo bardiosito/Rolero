@@ -1,0 +1,16 @@
+{
+  "passed": [
+    "arranque offline y navegación",
+    "salas, residentes y formato del ejemplo",
+    "confirmación, copia nativa e historial",
+    "entrada manual inválida conserva datos y da feedback",
+    "ausencia por intervalo excluye al médico",
+    "plantilla mensual requiere confirmar mes y conserva cambios por día",
+    "postguardia toma día anterior, excluye R1/R2 y conserva Rotantes",
+    "guardia manual tiene prioridad y se incluye en texto",
+    "respaldo exportado y rechazo de importación inválida",
+    "persistencia al volver a abrir y ausencia de desbordamiento móvil"
+  ],
+  "errors": [],
+  "screenshots": "C:\\Users\\bardiostudio\\Documents\\rolero\\qa\\screenshots"
+}

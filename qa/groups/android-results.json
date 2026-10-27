@@ -1,0 +1,23 @@
+{
+  "device": "emulator-5554",
+  "apk": "C:\\Users\\bardiostudio\\Documents\\rolero\\dist\\Rolero-debug.apk",
+  "platform": "Android WebView",
+  "passed": [
+    "estado previo compatible con esquema 2",
+    "inicio nativo con cuatro grupos vacíos y sin calendario mensual",
+    "guardias manuales aceptan R1/R2 y rechazan R3 y más de diez integrantes",
+    "guardia A toma D y el móvil queda en reserva con el fijo disponible",
+    "guardia D toma C y el móvil sustituye al fijo de postguardia",
+    "el móvil R1 sustituye una ausencia de apoyo por servicio",
+    "seis y tres grupos actualizan el ciclo y la reducción requiere confirmación",
+    "grupos, guardia seleccionada y emparejamientos sobreviven al cierre del proceso"
+  ],
+  "errors": [],
+  "currentStep": "",
+  "failure": null,
+  "cleanupErrors": [],
+  "success": true,
+  "diagnostics": [
+    "La conexión ADB se interrumpió al copiar una captura; se repitió y verificó la persistencia y se restauró el estado previo."
+  ]
+}
