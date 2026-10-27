@@ -1,0 +1,21 @@
+{
+  "version": "1.4.0",
+  "schemaVersion": 3,
+  "device": "emulator-5554",
+  "apk": "C:\\Users\\bardiostudio\\Documents\\rolero\\dist\\Rolero-debug.apk",
+  "platform": "Android WebView",
+  "screenshotsEnabled": false,
+  "passed": [
+    "La actualización conserva datos y la referencia cambia sólo desde Guardias",
+    "La fecha del rol calcula la postguardia y las sustituciones en ambos turnos",
+    "QX ordena seis salas y reúne dos médicos y residentes sin duplicados",
+    "Mover y restablecer sala conserva el ajuste previo y separa fechas y turnos",
+    "Referencia, salas y ajustes persisten con cierre normal y reapertura"
+  ],
+  "errors": [],
+  "diagnostics": [],
+  "currentStep": "",
+  "failure": null,
+  "cleanupErrors": [],
+  "success": true
+}

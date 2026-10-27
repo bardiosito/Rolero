@@ -1,0 +1,23 @@
+{
+  "version": "1.4.0",
+  "schemaVersion": 3,
+  "platform": "Edge headless",
+  "passed": [
+    "Crear ofrece seis salas cerradas después de Organiza y una vista previa sin postguardia",
+    "La fecha y guardia de referencia se guardan sólo desde Guardias",
+    "Ciclo reversible por fecha excluye la postguardia en ambos turnos, incluidos fines de semana y cambio de mes",
+    "Móviles usan la postguardia calculada para el día del rol",
+    "QX se ordena de 1 a 6 aunque se asigne al revés y reúne dos médicos sin repetir residentes",
+    "Mover de sala no duplica al médico y Restablecer recupera la actividad anterior",
+    "Las salas se conservan por fecha y turno y Organiza puede reemplazar la actividad",
+    "La sala usa el médico fuente de una cobertura y el texto reúne su nombre una sola vez",
+    "Respaldo y recarga conservan ancla, salas, móviles y ajustes previos",
+    "Los formularios de salas y la fecha de referencia caben entre 360 y 1440 píxeles"
+  ],
+  "errors": [],
+  "diagnostics": [],
+  "cleanupErrors": [],
+  "currentStep": "",
+  "failure": null,
+  "success": true
+}
