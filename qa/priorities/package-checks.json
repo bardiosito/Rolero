@@ -1,0 +1,62 @@
+[
+  {
+    "apk": "dist/Rolero.apk",
+    "asset": "index.html",
+    "sha256": "9A783E273F063BC02D08DEFF342D36D2817F6B39D65DAA28D271122C107AC2B1",
+    "matches": true
+  },
+  {
+    "apk": "dist/Rolero.apk",
+    "asset": "style.css",
+    "sha256": "9E58E485304217B33F0391C3E6AF2509D9CD3B494FAF12EBFFB14C2FBD6C0644",
+    "matches": true
+  },
+  {
+    "apk": "dist/Rolero.apk",
+    "asset": "ui.js",
+    "sha256": "310A225F5852CFDC46B1ADD8ECF4706E0ED3B8B334E595B052880326E5317FB4",
+    "matches": true
+  },
+  {
+    "apk": "dist/Rolero.apk",
+    "asset": "engine.js",
+    "sha256": "4B71E2217F81368AEE6C7B9A4A796BBAB52BEDD7F69986D8CD5ABAA77EB9CD74",
+    "matches": true
+  },
+  {
+    "apk": "dist/Rolero.apk",
+    "asset": "data.js",
+    "sha256": "FD7A54620AE1F4A0ACD3819EADF0EA9AFF4EEA2A8DD8BE6D4F19CF29575EF143",
+    "matches": true
+  },
+  {
+    "apk": "dist/Rolero-debug.apk",
+    "asset": "index.html",
+    "sha256": "9A783E273F063BC02D08DEFF342D36D2817F6B39D65DAA28D271122C107AC2B1",
+    "matches": true
+  },
+  {
+    "apk": "dist/Rolero-debug.apk",
+    "asset": "style.css",
+    "sha256": "9E58E485304217B33F0391C3E6AF2509D9CD3B494FAF12EBFFB14C2FBD6C0644",
+    "matches": true
+  },
+  {
+    "apk": "dist/Rolero-debug.apk",
+    "asset": "ui.js",
+    "sha256": "310A225F5852CFDC46B1ADD8ECF4706E0ED3B8B334E595B052880326E5317FB4",
+    "matches": true
+  },
+  {
+    "apk": "dist/Rolero-debug.apk",
+    "asset": "engine.js",
+    "sha256": "4B71E2217F81368AEE6C7B9A4A796BBAB52BEDD7F69986D8CD5ABAA77EB9CD74",
+    "matches": true
+  },
+  {
+    "apk": "dist/Rolero-debug.apk",
+    "asset": "data.js",
+    "sha256": "FD7A54620AE1F4A0ACD3819EADF0EA9AFF4EEA2A8DD8BE6D4F19CF29575EF143",
+    "matches": true
+  }
+]

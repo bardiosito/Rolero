@@ -1,0 +1,970 @@
+TAP version 13
+# Subtest: una asignación sin ausencia conserva su identidad y no tiene metadatos de cobertura activos
+ok 1 - una asignación sin ausencia conserva su identidad y no tiene metadatos de cobertura activos
+  ---
+  duration_ms: 46.2345
+  type: 'test'
+  ...
+# Subtest: la cobertura usa nombre y título del suplente con actividad, sala y residentes del ausente
+ok 2 - la cobertura usa nombre y título del suplente con actividad, sala y residentes del ausente
+  ---
+  duration_ms: 5.0137
+  type: 'test'
+  ...
+# Subtest: los médicos con el mismo nombre siguen siendo personas distintas por su ID
+ok 3 - los médicos con el mismo nombre siguen siendo personas distintas por su ID
+  ---
+  duration_ms: 3.8979
+  type: 'test'
+  ...
+# Subtest: un médico de otro turno puede cubrir y conserva su rol propio en su turno
+ok 4 - un médico de otro turno puede cubrir y conserva su rol propio en su turno
+  ---
+  duration_ms: 2.5721
+  type: 'test'
+  ...
+# Subtest: un médico sin actividad fija ese día puede cubrir una plaza activa
+ok 5 - un médico sin actividad fija ese día puede cubrir una plaza activa
+  ---
+  duration_ms: 1.2057
+  type: 'test'
+  ...
+# Subtest: la cobertura comienza y termina en fechas inclusivas y no cambia días fuera del intervalo
+ok 6 - la cobertura comienza y termina en fechas inclusivas y no cambia días fuera del intervalo
+  ---
+  duration_ms: 9.0002
+  type: 'test'
+  ...
+# Subtest: una ausencia médica sin suplente omite su plaza y mantiene los demás médicos
+ok 7 - una ausencia médica sin suplente omite su plaza y mantiene los demás médicos
+  ---
+  duration_ms: 1.4137
+  type: 'test'
+  ...
+# Subtest: la última ausencia registrada que cubre la fecha decide la cobertura sin conflicto
+ok 8 - la última ausencia registrada que cubre la fecha decide la cobertura sin conflicto
+  ---
+  duration_ms: 3.9388
+  type: 'test'
+  ...
+# Subtest: una cadena de coberturas usa al último médico disponible con el equipo del origen
+ok 9 - una cadena de coberturas usa al último médico disponible con el equipo del origen
+  ---
+  duration_ms: 2.7351
+  type: 'test'
+  ...
+# Subtest: un ciclo de coberturas no produce plazas ni impide generar el resto del rol
+ok 10 - un ciclo de coberturas no produce plazas ni impide generar el resto del rol
+  ---
+  duration_ms: 1.4468
+  type: 'test'
+  ...
+# Subtest: un suplente ausente sin cobertura deja sin asignación la plaza que iba a cubrir
+ok 11 - un suplente ausente sin cobertura deja sin asignación la plaza que iba a cubrir
+  ---
+  duration_ms: 0.9588
+  type: 'test'
+  ...
+# Subtest: generar una cobertura conserva las ausencias, combinaciones, ajustes e historial guardados
+ok 12 - generar una cobertura conserva las ausencias, combinaciones, ajustes e historial guardados
+  ---
+  duration_ms: 6.8957
+  type: 'test'
+  ...
+# Subtest: el registro acepta ausencia de residente y la guarda sin asignar cobertura médica
+ok 13 - el registro acepta ausencia de residente y la guarda sin asignar cobertura médica
+  ---
+  duration_ms: 1.9828
+  type: 'test'
+  ...
+# Subtest: un residente agregado sólo en ajustes del día admite una ausencia y se retira del reporte
+ok 14 - un residente agregado sólo en ajustes del día admite una ausencia y se retira del reporte
+  ---
+  duration_ms: 3.8825
+  type: 'test'
+  ...
+# Subtest: el registro rechaza identidades, tipos, coberturas y fechas inválidas sin cambiar datos
+ok 15 - el registro rechaza identidades, tipos, coberturas y fechas inválidas sin cambiar datos
+  ---
+  duration_ms: 5.8926
+  type: 'test'
+  ...
+# Subtest: quitar un médico limpia sus ajustes y ausencias y libera las referencias de cobertura
+ok 16 - quitar un médico limpia sus ajustes y ausencias y libera las referencias de cobertura
+  ---
+  duration_ms: 1.6876
+  type: 'test'
+  ...
+# Subtest: pueden eliminarse todos los médicos y restaurar el equipo vacío en un respaldo v3
+ok 17 - pueden eliminarse todos los médicos y restaurar el equipo vacío en un respaldo v3
+  ---
+  duration_ms: 1.0539
+  type: 'test'
+  ...
+# Subtest: el respaldo v3 admite cobertura opcional y rechaza coberturas corruptas o por el mismo ID
+ok 18 - el respaldo v3 admite cobertura opcional y rechaza coberturas corruptas o por el mismo ID
+  ---
+  duration_ms: 1.0786
+  type: 'test'
+  ...
+# Subtest: los respaldos v2 mantienen validación estricta de estructura y equipo no vacío
+ok 19 - los respaldos v2 mantienen validación estricta de estructura y equipo no vacío
+  ---
+  duration_ms: 0.8286
+  type: 'test'
+  ...
+# Subtest: una ausencia de residente lo retira de médicos, apoyos y guardia en ambos turnos y en los dos extremos
+ok 20 - una ausencia de residente lo retira de médicos, apoyos y guardia en ambos turnos y en los dos extremos
+  ---
+  duration_ms: 8.8729
+  type: 'test'
+  ...
+# Subtest: la guardia seleccionada corresponde a su fecha de referencia y avanza junto con la postguardia
+ok 21 - la guardia seleccionada corresponde a su fecha de referencia y avanza junto con la postguardia
+  ---
+  duration_ms: 45.8107
+  type: 'test'
+  ...
+# Subtest: los ciclos de tres a seis guardias se repiten y retroceden sin perder el orden
+ok 22 - los ciclos de tres a seis guardias se repiten y retroceden sin perder el orden
+  ---
+  duration_ms: 8.3553
+  type: 'test'
+  ...
+# Subtest: el ciclo incluye sábado y domingo y mantiene la continuidad al volver al lunes
+ok 23 - el ciclo incluye sábado y domingo y mantiene la continuidad al volver al lunes
+  ---
+  duration_ms: 2.5779
+  type: 'test'
+  ...
+# Subtest: cambiar de mes o año no reinicia la guardia anclada
+ok 24 - cambiar de mes o año no reinicia la guardia anclada
+  ---
+  duration_ms: 1.7325
+  type: 'test'
+  ...
+# Subtest: el 29 de febrero cuenta como un día completo del ciclo
+ok 25 - el 29 de febrero cuenta como un día completo del ciclo
+  ---
+  duration_ms: 1.4582
+  type: 'test'
+  ...
+# Subtest: elegir otra guardia para una fecha vuelve a anclar el ciclo sin alterar equipos ni integrantes
+ok 26 - elegir otra guardia para una fecha vuelve a anclar el ciclo sin alterar equipos ni integrantes
+  ---
+  duration_ms: 1.8064
+  type: 'test'
+  ...
+# Subtest: una guardia vacía ocupa su día del ciclo y no se salta al grupo siguiente
+ok 27 - una guardia vacía ocupa su día del ciclo y no se salta al grupo siguiente
+  ---
+  duration_ms: 1.8186
+  type: 'test'
+  ...
+# Subtest: ambos turnos retiran de todos los equipos a la guardia anterior calculada para la fecha
+ok 28 - ambos turnos retiran de todos los equipos a la guardia anterior calculada para la fecha
+  ---
+  duration_ms: 17.714
+  type: 'test'
+  ...
+# Subtest: las ausencias del día filtran la guardia actual además de retirar al grupo de postguardia
+ok 29 - las ausencias del día filtran la guardia actual además de retirar al grupo de postguardia
+  ---
+  duration_ms: 13.814
+  type: 'test'
+  ...
+# Subtest: guardar y restaurar conserva la referencia y no vuelve a anclar un respaldo ya configurado
+ok 30 - guardar y restaurar conserva la referencia y no vuelve a anclar un respaldo ya configurado
+  ---
+  duration_ms: 6.6884
+  type: 'test'
+  ...
+# Subtest: normalizar un respaldo sin referencia la añade una vez y conserva la guardia elegida
+ok 31 - normalizar un respaldo sin referencia la añade una vez y conserva la guardia elegida
+  ---
+  duration_ms: 7.6479
+  type: 'test'
+  ...
+# Subtest: un estado antiguo sin referencia conserva la selección estática hasta normalizarlo
+ok 32 - un estado antiguo sin referencia conserva la selección estática hasta normalizarlo
+  ---
+  duration_ms: 1.4962
+  type: 'test'
+  ...
+# Subtest: las referencias inválidas se rechazan sin cambiar selección ni equipo
+ok 33 - las referencias inválidas se rechazan sin cambiar selección ni equipo
+  ---
+  duration_ms: 12.6635
+  type: 'test'
+  ...
+# Subtest: consultar y generar fechas distintas no reescribe la referencia guardada
+ok 34 - consultar y generar fechas distintas no reescribe la referencia guardada
+  ---
+  duration_ms: 7.1157
+  type: 'test'
+  ...
+# Subtest: las imágenes se conservan: 18 médicos, apoyos y excepciones
+ok 35 - las imágenes se conservan: 18 médicos, apoyos y excepciones
+  ---
+  duration_ms: 3.7023
+  type: 'test'
+  ...
+# Subtest: rotantes se agrupan una vez antes de R2 y R1; deduplicación por apellido y grado
+ok 36 - rotantes se agrupan una vez antes de R2 y R1; deduplicación por apellido y grado
+  ---
+  duration_ms: 1.5534
+  type: 'test'
+  ...
+# Subtest: entrada manual valida grado y apellido, y permite líneas y punto y coma
+ok 37 - entrada manual valida grado y apellido, y permite líneas y punto y coma
+  ---
+  duration_ms: 1.3131
+  type: 'test'
+  ...
+# Subtest: lunes matutino sigue horario fuente y no incluye vespertinos ni coberturas sin asignar
+ok 38 - lunes matutino sigue horario fuente y no incluye vespertinos ni coberturas sin asignar
+  ---
+  duration_ms: 53.276
+  type: 'test'
+  ...
+# Subtest: los dos turnos y los cinco días se resuelven sin perder médicos de actividad residencia
+ok 39 - los dos turnos y los cinco días se resuelven sin perder médicos de actividad residencia
+  ---
+  duration_ms: 66.9725
+  type: 'test'
+  ...
+# Subtest: vacaciones excluyen médicos y residentes de combinaciones y apoyos sólo dentro del intervalo
+ok 40 - vacaciones excluyen médicos y residentes de combinaciones y apoyos sólo dentro del intervalo
+  ---
+  duration_ms: 19.5613
+  type: 'test'
+  ...
+# Subtest: reemplazos del día no alteran rol fijo ni días futuros
+ok 41 - reemplazos del día no alteran rol fijo ni días futuros
+  ---
+  duration_ms: 12.6709
+  type: 'test'
+  ...
+# Subtest: fin de semana sólo usa asignaciones manuales y no inventa horario de servicio
+ok 42 - fin de semana sólo usa asignaciones manuales y no inventa horario de servicio
+  ---
+  duration_ms: 7.5762
+  type: 'test'
+  ...
+# Subtest: rangos de las fuentes se conservan y los R1 sin destino del día pasan a Piso
+ok 43 - rangos de las fuentes se conservan y los R1 sin destino del día pasan a Piso
+  ---
+  duration_ms: 31.5053
+  type: 'test'
+  ...
+# Subtest: la guardia resuelta corresponde al grupo elegido y no se publica dentro del rol
+ok 44 - la guardia resuelta corresponde al grupo elegido y no se publica dentro del rol
+  ---
+  duration_ms: 12.3162
+  type: 'test'
+  ...
+# Subtest: el rol siempre publica médicos aunque una preferencia antigua solicite sólo residentes
+ok 45 - el rol siempre publica médicos aunque una preferencia antigua solicite sólo residentes
+  ---
+  duration_ms: 5.5421
+  type: 'test'
+  ...
+# Subtest: fechas y respaldo inválidos se rechazan
+ok 46 - fechas y respaldo inválidos se rechazan
+  ---
+  duration_ms: 4.7302
+  type: 'test'
+  ...
+# Subtest: las salas y el formato final siguen los ejemplos entregados
+ok 47 - las salas y el formato final siguen los ejemplos entregados
+  ---
+  duration_ms: 12.8184
+  type: 'test'
+  ...
+# Subtest: respaldos con colecciones anidadas inválidas no reemplazan datos válidos
+ok 48 - respaldos con colecciones anidadas inválidas no reemplazan datos válidos
+  ---
+  duration_ms: 3.9182
+  type: 'test'
+  ...
+# Subtest: la configuración inicial tiene cuatro guardias vacías y selección sin calendario
+ok 49 - la configuración inicial tiene cuatro guardias vacías y selección sin calendario
+  ---
+  duration_ms: 4.2596
+  type: 'test'
+  ...
+# Subtest: se admiten de tres a seis guardias y A toma como postguardia el último grupo
+ok 50 - se admiten de tres a seis guardias y A toma como postguardia el último grupo
+  ---
+  duration_ms: 44.5442
+  type: 'test'
+  ...
+# Subtest: los límites de cantidad rechazan decimales, valores fuera de rango y no modifican datos
+ok 51 - los límites de cantidad rechazan decimales, valores fuera de rango y no modifican datos
+  ---
+  duration_ms: 6.1886
+  type: 'test'
+  ...
+# Subtest: cada guardia admite hasta diez R1/R2 y rechaza seniors, duplicados y exceso
+ok 52 - cada guardia admite hasta diez R1/R2 y rechaza seniors, duplicados y exceso
+  ---
+  duration_ms: 1.117
+  type: 'test'
+  ...
+# Subtest: un residente no puede pertenecer a dos guardias y el rechazo es atómico
+ok 53 - un residente no puede pertenecer a dos guardias y el rechazo es atómico
+  ---
+  duration_ms: 3.211
+  type: 'test'
+  ...
+# Subtest: guardRoster devuelve únicamente los R1/R2 configurados, sin incorporar rotantes
+ok 54 - guardRoster devuelve únicamente los R1/R2 configurados, sin incorporar rotantes
+  ---
+  duration_ms: 1.6898
+  type: 'test'
+  ...
+# Subtest: reducir guardias con integrantes exige confirmación antes de retirar grupos y pareos
+ok 55 - reducir guardias con integrantes exige confirmación antes de retirar grupos y pareos
+  ---
+  duration_ms: 22.9951
+  type: 'test'
+  ...
+# Subtest: la guardia elegida filtra ausencias actuales y no depende del mes ni del día anterior
+ok 56 - la guardia elegida filtra ausencias actuales y no depende del mes ni del día anterior
+  ---
+  duration_ms: 2.1987
+  type: 'test'
+  ...
+# Subtest: migrar un respaldo v1 conserva médicos, vacaciones, ajustes e historial sin mutar el original
+ok 57 - migrar un respaldo v1 conserva médicos, vacaciones, ajustes e historial sin mutar el original
+  ---
+  duration_ms: 7.5227
+  type: 'test'
+  ...
+# Subtest: una unión antigua de once integrantes exige reconfiguración sin recortar el respaldo
+ok 58 - una unión antigua de once integrantes exige reconfiguración sin recortar el respaldo
+  ---
+  duration_ms: 4.6206
+  type: 'test'
+  ...
+# Subtest: una persona repetida entre guardias antiguas no se asigna arbitrariamente al migrar
+ok 59 - una persona repetida entre guardias antiguas no se asigna arbitrariamente al migrar
+  ---
+  duration_ms: 3.7729
+  type: 'test'
+  ...
+# Subtest: los respaldos v2 conservan grupos y selección y rechazan estructuras o integrantes inválidos
+ok 60 - los respaldos v2 conservan grupos y selección y rechazan estructuras o integrantes inválidos
+  ---
+  duration_ms: 5.7964
+  type: 'test'
+  ...
+# Subtest: un móvil sustituye al fijo de postguardia y conserva Rotantes y el rol base
+ok 61 - un móvil sustituye al fijo de postguardia y conserva Rotantes y el rol base
+  ---
+  duration_ms: 83.9892
+  type: 'test'
+  ...
+# Subtest: el móvil permanece en reserva y no se agrega como apoyo cuando el fijo está presente
+ok 62 - el móvil permanece en reserva y no se agrega como apoyo cuando el fijo está presente
+  ---
+  duration_ms: 11.4724
+  type: 'test'
+  ...
+# Subtest: una ausencia actual del fijo activa el relevo; una ausencia terminada no lo activa
+ok 63 - una ausencia actual del fijo activa el relevo; una ausencia terminada no lo activa
+  ---
+  duration_ms: 32.0174
+  type: 'test'
+  ...
+# Subtest: un móvil de postguardia no cubre al fijo ausente
+ok 64 - un móvil de postguardia no cubre al fijo ausente
+  ---
+  duration_ms: 6.591
+  type: 'test'
+  ...
+# Subtest: un móvil con ausencia no cubre al fijo de postguardia
+ok 65 - un móvil con ausencia no cubre al fijo de postguardia
+  ---
+  duration_ms: 34.0099
+  type: 'test'
+  ...
+# Subtest: el primer relevo disponible cubre una sola plaza y los demás quedan en reserva
+ok 66 - el primer relevo disponible cubre una sola plaza y los demás quedan en reserva
+  ---
+  duration_ms: 12.9054
+  type: 'test'
+  ...
+# Subtest: marcar un residente como móvil retira su ubicación fija y evita que aparezca dos veces
+ok 67 - marcar un residente como móvil retira su ubicación fija y evita que aparezca dos veces
+  ---
+  duration_ms: 7.2746
+  type: 'test'
+  ...
+# Subtest: el relevo también cubre a un R1 fijo de apoyo por servicio
+ok 68 - el relevo también cubre a un R1 fijo de apoyo por servicio
+  ---
+  duration_ms: 7.8737
+  type: 'test'
+  ...
+# Subtest: los pareos matutino y vespertino son independientes
+ok 69 - los pareos matutino y vespertino son independientes
+  ---
+  duration_ms: 13.1401
+  type: 'test'
+  ...
+# Subtest: no se inventa una plaza cuando el médico del fijo no participa en ese turno
+ok 70 - no se inventa una plaza cuando el médico del fijo no participa en ese turno
+  ---
+  duration_ms: 7.898
+  type: 'test'
+  ...
+# Subtest: quitar el médico del fijo conserva el pareo para corregirlo y no impide restaurar el respaldo
+ok 71 - quitar el médico del fijo conserva el pareo para corregirlo y no impide restaurar el respaldo
+  ---
+  duration_ms: 8.9182
+  type: 'test'
+  ...
+# Subtest: un móvil no se duplica si el mismo fijo figura en dos actividades
+ok 72 - un móvil no se duplica si el mismo fijo figura en dos actividades
+  ---
+  duration_ms: 7.5949
+  type: 'test'
+  ...
+# Subtest: reconfigurar o quitar un pareo modifica únicamente ese móvil y turno
+ok 73 - reconfigurar o quitar un pareo modifica únicamente ese móvil y turno
+  ---
+  duration_ms: 1.8037
+  type: 'test'
+  ...
+# Subtest: se rechazan pareos inválidos, autorrelevos y cadenas de móviles sin mutar el estado
+ok 74 - se rechazan pareos inválidos, autorrelevos y cadenas de móviles sin mutar el estado
+  ---
+  duration_ms: 6.0312
+  type: 'test'
+  ...
+# Subtest: generar y guardar/restaurar un respaldo mantiene los pareos y no altera el rol fijo
+ok 75 - generar y guardar/restaurar un respaldo mantiene los pareos y no altera el rol fijo
+  ---
+  duration_ms: 23.418
+  type: 'test'
+  ...
+# Subtest: un pareo móvil guardado sigue cubriendo la plaza original aunque otro médico la cubra
+ok 76 - un pareo móvil guardado sigue cubriendo la plaza original aunque otro médico la cubra
+  ---
+  duration_ms: 17.3637
+  type: 'test'
+  ...
+# Subtest: las salas reconocen números y formatos anteriores dentro del rango QX 1 a QX 6
+ok 77 - las salas reconocen números y formatos anteriores dentro del rango QX 1 a QX 6
+  ---
+  duration_ms: 2.815
+  type: 'test'
+  ...
+# Subtest: el tablero muestra seis salas y distingue médicos de quirófano sin sala de otros candidatos
+ok 78 - el tablero muestra seis salas y distingue médicos de quirófano sin sala de otros candidatos
+  ---
+  duration_ms: 60.1397
+  type: 'test'
+  ...
+# Subtest: asignar sala lleva al médico a quirófano sólo en esa fecha y conserva su rol fijo
+ok 79 - asignar sala lleva al médico a quirófano sólo en esa fecha y conserva su rol fijo
+  ---
+  duration_ms: 18.7495
+  type: 'test'
+  ...
+# Subtest: dos médicos en la misma sala se publican en líneas propias con sus residentes
+ok 80 - dos médicos en la misma sala se publican en líneas propias con sus residentes
+  ---
+  duration_ms: 54.604
+  type: 'test'
+  ...
+# Subtest: las salas ocupadas se ordenan de QX 1 a QX 6 sin importar el orden de asignación
+ok 81 - las salas ocupadas se ordenan de QX 1 a QX 6 sin importar el orden de asignación
+  ---
+  duration_ms: 9.9553
+  type: 'test'
+  ...
+# Subtest: sólo las salas QX 1 a 6 incluyen médicos en el reporte y los demás siguen disponibles para asignar
+ok 82 - sólo las salas QX 1 a 6 incluyen médicos en el reporte y los demás siguen disponibles para asignar
+  ---
+  duration_ms: 11.2857
+  type: 'test'
+  ...
+# Subtest: la unión de residentes de la sala respeta ausencias y postguardia
+ok 83 - la unión de residentes de la sala respeta ausencias y postguardia
+  ---
+  duration_ms: 8.0231
+  type: 'test'
+  ...
+# Subtest: la cobertura médica usa la sala y el equipo del origen y muestra el nombre del suplente
+ok 84 - la cobertura médica usa la sala y el equipo del origen y muestra el nombre del suplente
+  ---
+  duration_ms: 12.6232
+  type: 'test'
+  ...
+# Subtest: el suplente que ocupa dos plazas conserva cada equipo en su propia línea
+ok 85 - el suplente que ocupa dos plazas conserva cada equipo en su propia línea
+  ---
+  duration_ms: 5.9487
+  type: 'test'
+  ...
+# Subtest: las asignaciones inválidas no alteran el día, los equipos ni las salas previas
+ok 86 - las asignaciones inválidas no alteran el día, los equipos ni las salas previas
+  ---
+  duration_ms: 4.6268
+  type: 'test'
+  ...
+# Subtest: un médico excluido o ausente sin cobertura no puede asignarse a una sala
+ok 87 - un médico excluido o ausente sin cobertura no puede asignarse a una sala
+  ---
+  duration_ms: 3.6574
+  type: 'test'
+  ...
+# Subtest: quitar una sala restaura la actividad implícita sin perder el ajuste de residentes
+ok 88 - quitar una sala restaura la actividad implícita sin perder el ajuste de residentes
+  ---
+  duration_ms: 14.3035
+  type: 'test'
+  ...
+# Subtest: reasignar varias veces y limpiar restaura sala y actividad originales conservando cambios ajenos
+ok 89 - reasignar varias veces y limpiar restaura sala y actividad originales conservando cambios ajenos
+  ---
+  duration_ms: 8.9038
+  type: 'test'
+  ...
+# Subtest: limpiar una sala antigua sin marcador conserva la actividad manual guardada
+ok 90 - limpiar una sala antigua sin marcador conserva la actividad manual guardada
+  ---
+  duration_ms: 1.7731
+  type: 'test'
+  ...
+# Subtest: las salas se guardan por fecha y turno y pueden restaurarse sin modificar el rol fijo
+ok 91 - las salas se guardan por fecha y turno y pueden restaurarse sin modificar el rol fijo
+  ---
+  duration_ms: 22.5594
+  type: 'test'
+  ...
+# Subtest: puede asignarse una sala de fin de semana sin inventar actividad para otros días
+ok 92 - puede asignarse una sala de fin de semana sin inventar actividad para otros días
+  ---
+  duration_ms: 5.1946
+  type: 'test'
+  ...
+# Subtest: la guardia A toma D como postguardia y sólo gestiona R1/R2
+ok 93 - la guardia A toma D como postguardia y sólo gestiona R1/R2
+  ---
+  duration_ms: 43.6021
+  type: 'test'
+  ...
+# Subtest: elegir B excluye a A de ambos turnos y conserva los rotantes con su médico
+ok 94 - elegir B excluye a A de ambos turnos y conserva los rotantes con su médico
+  ---
+  duration_ms: 66.7617
+  type: 'test'
+  ...
+# Subtest: el grupo de postguardia se excluye también de los apoyos por servicio
+ok 95 - el grupo de postguardia se excluye también de los apoyos por servicio
+  ---
+  duration_ms: 13.9196
+  type: 'test'
+  ...
+# Subtest: el apellido y grado son identidades distintas para postguardia
+ok 96 - el apellido y grado son identidades distintas para postguardia
+  ---
+  duration_ms: 12.1682
+  type: 'test'
+  ...
+# Subtest: los integrantes de la guardia actual siguen disponibles ese día y se resuelven por separado
+ok 97 - los integrantes de la guardia actual siguen disponibles ese día y se resuelven por separado
+  ---
+  duration_ms: 6.809
+  type: 'test'
+  ...
+# Subtest: las ausencias actuales se respetan además de la exclusión de postguardia
+ok 98 - las ausencias actuales se respetan además de la exclusión de postguardia
+  ---
+  duration_ms: 7.086
+  type: 'test'
+  ...
+# Subtest: una guardia aún sin configurar no inventa quién está de postguardia
+ok 99 - una guardia aún sin configurar no inventa quién está de postguardia
+  ---
+  duration_ms: 22.366
+  type: 'test'
+  ...
+# Subtest: cambiar la guardia seleccionada recalcula los excluidos sin alterar el rol fijo
+ok 100 - cambiar la guardia seleccionada recalcula los excluidos sin alterar el rol fijo
+  ---
+  duration_ms: 21.0007
+  type: 'test'
+  ...
+# Subtest: el primero de mes, cambio de año y fin de semana usan el grupo elegido sin calendario
+ok 101 - el primero de mes, cambio de año y fin de semana usan el grupo elegido sin calendario
+  ---
+  duration_ms: 1.9516
+  type: 'test'
+  ...
+# Subtest: generar no cambia integrantes, selección ni combinaciones guardadas
+ok 102 - generar no cambia integrantes, selección ni combinaciones guardadas
+  ---
+  duration_ms: 11.6232
+  type: 'test'
+  ...
+# Subtest: el respaldo conserva la guardia actual y la postguardia cíclica después de restaurar
+ok 103 - el respaldo conserva la guardia actual y la postguardia cíclica después de restaurar
+  ---
+  duration_ms: 3.3345
+  type: 'test'
+  ...
+# Subtest: el estado inicial v3 publica médicos, excluye postguardia y deja apagado el aviso de Piso
+ok 104 - el estado inicial v3 publica médicos, excluye postguardia y deja apagado el aviso de Piso
+  ---
+  duration_ms: 58.5382
+  type: 'test'
+  ...
+# Subtest: las preferencias antiguas y opciones de publicación no ocultan médicos ni reincorporan postguardia
+ok 105 - las preferencias antiguas y opciones de publicación no ocultan médicos ni reincorporan postguardia
+  ---
+  duration_ms: 18.1791
+  type: 'test'
+  ...
+# Subtest: los avisos y la fecha de trabajo nunca se agregan al texto compartido del rol
+ok 106 - los avisos y la fecha de trabajo nunca se agregan al texto compartido del rol
+  ---
+  duration_ms: 5.9391
+  type: 'test'
+  ...
+# Subtest: activar el aviso añade la frase exacta una sola vez en Piso en ambos turnos
+ok 107 - activar el aviso añade la frase exacta una sola vez en Piso en ambos turnos
+  ---
+  duration_ms: 15.3863
+  type: 'test'
+  ...
+# Subtest: apagar el aviso retira únicamente la frase y conserva las personas asignadas en Piso
+ok 108 - apagar el aviso retira únicamente la frase y conserva las personas asignadas en Piso
+  ---
+  duration_ms: 11.187
+  type: 'test'
+  ...
+# Subtest: el aviso crea Piso sin personas asignadas y apagarlo retira esa sección vacía
+ok 109 - el aviso crea Piso sin personas asignadas y apagarlo retira esa sección vacía
+  ---
+  duration_ms: 1.0861
+  type: 'test'
+  ...
+# Subtest: Piso con un médico y residentes recibe el aviso sin reemplazar su equipo
+ok 110 - Piso con un médico y residentes recibe el aviso sin reemplazar su equipo
+  ---
+  duration_ms: 5.6942
+  type: 'test'
+  ...
+# Subtest: las notas de Piso de versiones anteriores no se publican con el aviso encendido o apagado
+ok 111 - las notas de Piso de versiones anteriores no se publican con el aviso encendido o apagado
+  ---
+  duration_ms: 30.0283
+  type: 'test'
+  ...
+# Subtest: migrar v2 conserva grupos, móviles, equipo, ausencias, ajustes e historial y reinicia publicación
+ok 112 - migrar v2 conserva grupos, móviles, equipo, ausencias, ajustes e historial y reinicia publicación
+  ---
+  duration_ms: 6.5707
+  type: 'test'
+  ...
+# Subtest: restaurar v3 conserva el interruptor de Piso y normaliza las preferencias antiguas
+ok 113 - restaurar v3 conserva el interruptor de Piso y normaliza las preferencias antiguas
+  ---
+  duration_ms: 11.513
+  type: 'test'
+  ...
+# Subtest: el respaldo rechaza valores no booleanos del interruptor de Piso
+ok 114 - el respaldo rechaza valores no booleanos del interruptor de Piso
+  ---
+  duration_ms: 1.7009
+  type: 'test'
+  ...
+# Subtest: generar no reescribe preferencias antiguas ni las notas conservadas del respaldo
+ok 115 - generar no reescribe preferencias antiguas ni las notas conservadas del respaldo
+  ---
+  duration_ms: 10.5542
+  type: 'test'
+  ...
+# Subtest: QX repite sala en orden de alta y conserva cada equipo propio tras respaldo
+ok 116 - QX repite sala en orden de alta y conserva cada equipo propio tras respaldo
+  ---
+  duration_ms: 59.4761
+  type: 'test'
+  ...
+# Subtest: mover añade al final, misma sala conserva posición y restablecer conserva otros campos
+ok 117 - mover añade al final, misma sala conserva posición y restablecer conserva otros campos
+  ---
+  duration_ms: 12.6362
+  type: 'test'
+  ...
+# Subtest: un destino por turno coloca al R1 con el médico elegido sin modificar sus combinaciones base
+ok 118 - un destino por turno coloca al R1 con el médico elegido sin modificar sus combinaciones base
+  ---
+  duration_ms: 4.1916
+  type: 'test'
+  ...
+# Subtest: servicio elige al médico con menos R1 y Piso permanece separado sin Apoyo
+ok 119 - servicio elige al médico con menos R1 y Piso permanece separado sin Apoyo
+  ---
+  duration_ms: 8.6606
+  type: 'test'
+  ...
+# Subtest: ausencia y postguardia excluyen al R1; cobertura conserva el destino de origen y falta de médico va a Piso
+ok 120 - ausencia y postguardia excluyen al R1; cobertura conserva el destino de origen y falta de médico va a Piso
+  ---
+  duration_ms: 4.1875
+  type: 'test'
+  ...
+# Subtest: relevo de un R1 configurado cubre su nuevo médico y no su ubicación anterior
+ok 121 - relevo de un R1 configurado cubre su nuevo médico y no su ubicación anterior
+  ---
+  duration_ms: 2.8108
+  type: 'test'
+  ...
+# Subtest: los R1 móviles mantienen reserva y sustituciones antes que el destino nuevo
+ok 122 - los R1 móviles mantienen reserva y sustituciones antes que el destino nuevo
+  ---
+  duration_ms: 2.5192
+  type: 'test'
+  ...
+# Subtest: renombre, promoción y retiro mantienen identidad y limpian las reglas R1
+ok 123 - renombre, promoción y retiro mantienen identidad y limpian las reglas R1
+  ---
+  duration_ms: 5.3861
+  type: 'test'
+  ...
+# Subtest: borrar médico elimina su destino, baja de residente limpia reglas y entradas inválidas son atómicas
+ok 124 - borrar médico elimina su destino, baja de residente limpia reglas y entradas inválidas son atómicas
+  ---
+  duration_ms: 4.5884
+  type: 'test'
+  ...
+# Subtest: fin de semana heredado no inventa actividades y los destinos explícitos persisten en respaldo
+ok 125 - fin de semana heredado no inventa actividades y los destinos explícitos persisten en respaldo
+  ---
+  duration_ms: 2.5416
+  type: 'test'
+  ...
+# Subtest: un médico QX sin sala no aparece y su R2 pasa primero a otra sala sin mutar el rol fijo
+ok 126 - un médico QX sin sala no aparece y su R2 pasa primero a otra sala sin mutar el rol fijo
+  ---
+  duration_ms: 61.7161
+  type: 'test'
+  ...
+# Subtest: R2 sin sala sigue Consulta, Urgencias y finalmente Piso
+ok 127 - R2 sin sala sigue Consulta, Urgencias y finalmente Piso
+  ---
+  duration_ms: 3.3872
+  type: 'test'
+  ...
+# Subtest: R2 ya presente en un equipo no se duplica al redistribuir desde un médico omitido
+ok 128 - R2 ya presente en un equipo no se duplica al redistribuir desde un médico omitido
+  ---
+  duration_ms: 1.3066
+  type: 'test'
+  ...
+# Subtest: postguardia y ausencia siguen excluyendo R2 redistribuidos y sus móviles
+ok 129 - postguardia y ausencia siguen excluyendo R2 redistribuidos y sus móviles
+  ---
+  duration_ms: 6.1639
+  type: 'test'
+  ...
+# Subtest: R1 compartido permanece en su sala al retirar un médico y pasa a Piso si la sala queda vacía
+ok 130 - R1 compartido permanece en su sala al retirar un médico y pasa a Piso si la sala queda vacía
+  ---
+  duration_ms: 12.5556
+  type: 'test'
+  ...
+# Subtest: mover al médico fuera de una sala compartida conserva al R1 en la sala anterior
+ok 131 - mover al médico fuera de una sala compartida conserva al R1 en la sala anterior
+  ---
+  duration_ms: 7.3273
+  type: 'test'
+  ...
+# Subtest: elegir otro médico actualiza la sala del R1 y restablecer recupera su equipo anterior
+ok 132 - elegir otro médico actualiza la sala del R1 y restablecer recupera su equipo anterior
+  ---
+  duration_ms: 8.0141
+  type: 'test'
+  ...
+# Subtest: R1 sin rol va a Piso pero un móvil en reserva no abandona esa reserva
+ok 133 - R1 sin rol va a Piso pero un móvil en reserva no abandona esa reserva
+  ---
+  duration_ms: 2.7718
+  type: 'test'
+  ...
+# Subtest: un R2 disponible de una guardia sin equipo también queda en Piso
+ok 134 - un R2 disponible de una guardia sin equipo también queda en Piso
+  ---
+  duration_ms: 1.7257
+  type: 'test'
+  ...
+# Subtest: Urgencias incorpora R1 al médico del servicio y sin médico queda en Piso
+ok 135 - Urgencias incorpora R1 al médico del servicio y sin médico queda en Piso
+  ---
+  duration_ms: 2.3104
+  type: 'test'
+  ...
+# Subtest: la omisión es por fecha y turno, y asignar sala incluye al médico nuevamente
+ok 136 - la omisión es por fecha y turno, y asignar sala incluye al médico nuevamente
+  ---
+  duration_ms: 4.0925
+  type: 'test'
+  ...
+# Subtest: respaldo, renombre y ascenso conservan o limpian la sala del R1 según su identidad
+ok 137 - respaldo, renombre y ascenso conservan o limpian la sala del R1 según su identidad
+  ---
+  duration_ms: 3.6728
+  type: 'test'
+  ...
+# Subtest: el padrón unifica al integrante de guardia y al fijo por apellido y grado
+ok 138 - el padrón unifica al integrante de guardia y al fijo por apellido y grado
+  ---
+  duration_ms: 34.3108
+  type: 'test'
+  ...
+# Subtest: el padrón incluye juniors sin guardia que sólo existen en un servicio o ajuste del día
+ok 139 - el padrón incluye juniors sin guardia que sólo existen en un servicio o ajuste del día
+  ---
+  duration_ms: 1.9341
+  type: 'test'
+  ...
+# Subtest: un alta nueva con médicos por turno se guarda y aparece en el rol de cada turno
+ok 140 - un alta nueva con médicos por turno se guarda y aparece en el rol de cada turno
+  ---
+  duration_ms: 22.7832
+  type: 'test'
+  ...
+# Subtest: un R1 nuevo sin médico conserva su guardia y pasa a Piso sin inventar un médico
+ok 141 - un R1 nuevo sin médico conserva su guardia y pasa a Piso sin inventar un médico
+  ---
+  duration_ms: 5.3827
+  type: 'test'
+  ...
+# Subtest: elegir un junior fijo existente lo incorpora a una guardia sin borrar sus referencias
+ok 142 - elegir un junior fijo existente lo incorpora a una guardia sin borrar sus referencias
+  ---
+  duration_ms: 3.1924
+  type: 'test'
+  ...
+# Subtest: las altas rechazan nombre, grado, guardia o identidad inválidos de forma atómica
+ok 143 - las altas rechazan nombre, grado, guardia o identidad inválidos de forma atómica
+  ---
+  duration_ms: 7.586
+  type: 'test'
+  ...
+# Subtest: cada guardia admite diez integrantes y rechaza el alta número once sin modificar equipos
+ok 144 - cada guardia admite diez integrantes y rechaza el alta número once sin modificar equipos
+  ---
+  duration_ms: 2.7202
+  type: 'test'
+  ...
+# Subtest: el cambio R1 a R2 conserva asignaciones y metadatos y actualiza ausencias y ambos extremos de móviles
+ok 145 - el cambio R1 a R2 conserva asignaciones y metadatos y actualiza ausencias y ambos extremos de móviles
+  ---
+  duration_ms: 2.7403
+  type: 'test'
+  ...
+# Subtest: el cambio de nombre se guarda en guardia, equipos, apoyos, ajustes, ausencias y móviles
+ok 146 - el cambio de nombre se guarda en guardia, equipos, apoyos, ajustes, ausencias y móviles
+  ---
+  duration_ms: 5.9019
+  type: 'test'
+  ...
+# Subtest: una promoción con vacaciones mantiene la exclusión por la nueva identidad en las mismas fechas
+ok 147 - una promoción con vacaciones mantiene la exclusión por la nueva identidad en las mismas fechas
+  ---
+  duration_ms: 6.1403
+  type: 'test'
+  ...
+# Subtest: editar los médicos de un turno conserva el otro turno, apoyos y ajustes diarios
+ok 148 - editar los médicos de un turno conserva el otro turno, apoyos y ajustes diarios
+  ---
+  duration_ms: 5.1805
+  type: 'test'
+  ...
+# Subtest: vaciar los médicos de un turno retira sólo sus asignaciones fijas y permite conservar el otro
+ok 149 - vaciar los médicos de un turno retira sólo sus asignaciones fijas y permite conservar el otro
+  ---
+  duration_ms: 1.5466
+  type: 'test'
+  ...
+# Subtest: asignaciones con médicos inexistentes o de otro turno se rechazan antes de cambiar identidad
+ok 150 - asignaciones con médicos inexistentes o de otro turno se rechazan antes de cambiar identidad
+  ---
+  duration_ms: 3.0052
+  type: 'test'
+  ...
+# Subtest: el mismo apellido en grados distintos es válido y un cambio que choque con otra identidad se rechaza
+ok 151 - el mismo apellido en grados distintos es válido y un cambio que choque con otra identidad se rechaza
+  ---
+  duration_ms: 1.4266
+  type: 'test'
+  ...
+# Subtest: mover un integrante a otra guardia conserva su equipo y una sola pertenencia
+ok 152 - mover un integrante a otra guardia conserva su equipo y una sola pertenencia
+  ---
+  duration_ms: 1.0043
+  type: 'test'
+  ...
+# Subtest: una guardia llena rechaza el traslado con cambio de nombre, grado y equipo de forma atómica
+ok 153 - una guardia llena rechaza el traslado con cambio de nombre, grado y equipo de forma atómica
+  ---
+  duration_ms: 1.0922
+  type: 'test'
+  ...
+# Subtest: editar a un integrante dentro de su guardia llena no ocupa una plaza adicional
+ok 154 - editar a un integrante dentro de su guardia llena no ocupa una plaza adicional
+  ---
+  duration_ms: 1.7576
+  type: 'test'
+  ...
+# Subtest: un móvil no puede quedar sin guardia y el rechazo conserva todos sus datos y pareos
+ok 155 - un móvil no puede quedar sin guardia y el rechazo conserva todos sus datos y pareos
+  ---
+  duration_ms: 1.0757
+  type: 'test'
+  ...
+# Subtest: un fijo que no es móvil puede quedar sin guardia y conserva los pareos que lo cubren
+ok 156 - un fijo que no es móvil puede quedar sin guardia y conserva los pareos que lo cubren
+  ---
+  duration_ms: 3.6849
+  type: 'test'
+  ...
+# Subtest: eliminar un junior limpia todas sus referencias activas y no reaparece al restaurar
+ok 157 - eliminar un junior limpia todas sus referencias activas y no reaparece al restaurar
+  ---
+  duration_ms: 5.3821
+  type: 'test'
+  ...
+# Subtest: promover a R3 retira al junior sin crear un R3 nuevo y conserva seniors e historial
+ok 158 - promover a R3 retira al junior sin crear un R3 nuevo y conserva seniors e historial
+  ---
+  duration_ms: 1.5527
+  type: 'test'
+  ...
+# Subtest: el borrado de un junior no modifica seniors homónimos ni acepta borrar una identidad R3
+ok 159 - el borrado de un junior no modifica seniors homónimos ni acepta borrar una identidad R3
+  ---
+  duration_ms: 0.781
+  type: 'test'
+  ...
+# Subtest: un residente presente sólo en ajustes diarios puede editarse y borrarse sin dejar referencias
+ok 160 - un residente presente sólo en ajustes diarios puede editarse y borrarse sin dejar referencias
+  ---
+  duration_ms: 5.062
+  type: 'test'
+  ...
+1..160
+# tests 160
+# suites 0
+# pass 160
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 928.2546

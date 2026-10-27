@@ -1,0 +1,57 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const {pathToFileURL}=require('node:url');
+const out=path.resolve('qa/priorities'),key='rolero-state-v1',date='2026-10-26';
+fs.mkdirSync(out,{recursive:true});
+async function flow(page,check,clipboard){
+ const tab=name=>page.locator('.bottom-nav [data-tab="'+name+'"]').click();
+ const detail=name=>page.locator('details[data-detail="'+name+'"]');
+ const open=async name=>{const d=detail(name);if(!await d.evaluate(e=>e.open))await d.locator('summary').first().click();};
+ const state=()=>page.evaluate(()=>RoleroUI.getState());
+ const preview=()=>page.locator('#preview-text').inputValue();
+ const shift=value=>page.locator('[data-action="shift"][data-shift="'+value+'"]').click();
+ const ready=async()=>{await page.waitForFunction(()=>!!window.RoleroUI);await page.locator('#create-date').waitFor();await page.locator('#create-date').fill(date);await page.locator('#create-date').dispatchEvent('change');await clipboard(page);};
+ const fresh=()=>page.evaluate(()=>{const s=JSON.parse(JSON.stringify(ROLERO_DEFAULTS)),p=(name,grade=1)=>({name,grade});s.doctors=[{id:'a',name:'Alfa',title:'Dr.',shift:'matutino',schedule:Array(5).fill('qx'),residents:[p('Mayor A',4),p('Dos A',2),p('Uno')]},{id:'b',name:'Beta',title:'Dra.',shift:'matutino',schedule:Array(5).fill('qx'),residents:[p('Mayor B',3),p('Dos B',2)]},{id:'c',name:'Gamma',title:'Dr.',shift:'vespertino',schedule:Array(5).fill('consulta'),residents:[p('Dos C',2),p('Uno')]},{id:'d',name:'Delta',title:'Dra.',shift:'vespertino',schedule:Array(5).fill('qx'),residents:[p('Dos D',2)]}];s.serviceRules=[];s.dailyOverrides={};s.absences=[];s.mobileAssignments={matutino:[],vespertino:[]};s.r1Priorities={};s.guardGroups.forEach(g=>g.members=[]);s.guardGroups[0].members=[p('Libre')];s.dutySelection={guardGroupId:'A',referenceDate:'2026-10-26'};return s;});
+ const load=async value=>{await page.evaluate(({key,value})=>localStorage.setItem(key,JSON.stringify(value)),{key,value});await page.reload();await ready();};
+ const assign=async(room,id)=>{await open('qx-rooms');await open('qx-room-'+room);const f=page.locator('form[data-form="qx-room"][data-room="'+room+'"]');await f.locator('[name="doctorId"]').selectOption(id);await f.locator('[type="submit"]').click();};
+ const destination=async(person,turn,value,doctorId)=>{await tab('equipo');await open('r1-priorities');const encoded=encodeURIComponent(person);await open('r1-priority-'+encoded);await open('r1-priority-'+encoded+'-'+turn);const f=page.locator('form[data-form="r1-priorities"][data-key="'+person+'"][data-shift="'+turn+'"]');await f.locator('[name="destination"]').selectOption(value);if(value==='doctor')await f.locator('[name="doctorId"]').selectOption(doctorId);else assert.equal(await f.locator('[name="doctorId"]').isDisabled(),true);await f.locator('[type="submit"]').click();};
+ const copy=async()=>{const expected=await preview();await page.locator('.preview-card [data-action="copy"]').click();await page.waitForFunction(()=>typeof window.__qaCopiedText==='string');assert.equal(await page.evaluate(()=>window.__qaCopiedText),expected);};
+ const generated=()=>page.evaluate(({date})=>Rolero.generate(RoleroUI.getState(),{date,shift:'matutino'}),{date});
+ await check('Misma sala conserva líneas, equipos y orden de incorporación al mover y recargar',async()=>{
+  await load(await fresh());await assign(1,'b');await assign(1,'a');let lines=(await preview()).split('\n').filter(l=>l.startsWith('QX 1'));
+  assert.deepEqual(lines,['QX 1 Dra. Beta / Rotantes / Dos B R2','QX 1 Dr. Alfa / Rotantes / Dos A R2 / Uno R1']);await copy();
+  await assign(2,'b');await assign(1,'b');lines=(await preview()).split('\n').filter(l=>l.startsWith('QX 1'));assert.match(lines[0],/Alfa/);assert.match(lines[1],/Beta/);
+  const before=await state();await page.reload();await ready();assert.deepEqual(await state(),before);assert.match((await preview()).split('\n').find(l=>l.startsWith('QX 1')),/Alfa/);
+ });
+ await check('Equipo configura un destino y médico por turno, reparte servicios y permite conservar el rol anterior',async()=>{
+  const original=await fresh();await load(original);await tab('equipo');assert.ok(await detail('r1-priorities').evaluate(e=>!!(document.querySelector('details[data-detail="absences"]').compareDocumentPosition(e)&Node.DOCUMENT_POSITION_FOLLOWING)));
+  await destination('uno|R1','matutino','doctor','b');await open('team-matutino');assert.doesNotMatch(await detail('roster-a').locator('summary').first().innerText(),/Uno/);assert.match(await detail('roster-b').locator('summary').first().innerText(),/Uno/);await tab('crear');await open('organize-turn');assert.doesNotMatch(await detail('day-a').locator('summary').first().innerText(),/Uno/);assert.match(await detail('day-b').locator('summary').first().innerText(),/Uno/);let result=await generated(),a=result.groups.flatMap(g=>g.doctors).find(d=>d.id==='a'),b=result.groups.flatMap(g=>g.doctors).find(d=>d.id==='b');assert.ok(!a.residents.some(p=>p.name==='Uno'));assert.ok(b.residents.some(p=>p.name==='Uno'));assert.deepEqual((await state()).doctors,original.doctors);
+  await destination('libre|R1','matutino','service:qx');await tab('crear');result=await generated();a=result.groups.flatMap(g=>g.doctors).find(d=>d.id==='a');assert.ok(a.residents.some(p=>p.name==='Libre'));assert.doesNotMatch(await preview(),/Apoyo/);
+  await destination('uno|R1','vespertino','service:qx');await tab('crear');await shift('vespertino');assert.match(await preview(),/Dra\. Delta[^\n]*Uno R1/);assert.doesNotMatch((await preview()).split('\n').find(l=>l.includes('Dr. Gamma')),/Uno R1/);
+  await destination('libre|R1','vespertino','service:piso');await tab('crear');await shift('vespertino');assert.match(await preview(),/Piso\nLibre R1/);
+  await destination('uno|R1','matutino','');assert.equal((await state()).r1Priorities['uno|R1'].matutino,undefined);await tab('crear');await shift('matutino');assert.match(await preview(),/Dr\. Alfa[^\n]*Uno R1/);
+ });
+ await check('Ausencias, postguardia, cobertura y relevos respetan el destino del R1',async()=>{
+  let s=await fresh();s.r1Priorities={'uno|R1':{matutino:['doctor:b']}};s.absences=[{id:'m',personType:'doctor',personId:'b',coverDoctorId:'a',start:date,end:date}];await load(s);let result=await generated();assert.ok(result.groups.flatMap(g=>g.doctors).find(d=>d.id==='b').residents.some(p=>p.name==='Uno'));
+  s.absences[0].coverDoctorId='';await load(s);assert.match(await preview(),/Piso\nUno R1/);
+  s.absences=[{id:'r',personType:'resident',personId:'uno|R1',start:date,end:date}];await load(s);assert.doesNotMatch(await preview(),/Uno R1/);
+  s.absences=[];s.guardGroups[3].members=[{name:'Uno',grade:1}];s.guardGroups[1].members=[{name:'Relevo',grade:2}];s.mobileAssignments.matutino=[{residentKey:'relevo|R2',fixedResidentKey:'uno|R1'}];await load(s);assert.doesNotMatch(await preview(),/Uno R1/);assert.match(await preview(),/Dra\. Beta[^\n]*Relevo R2 \(móvil\)/);
+ });
+ await check('Orden y destinos sobreviven a respaldo, edición del otro turno y recarga',async()=>{
+  await load(await fresh());await assign(2,'b');await assign(2,'a');await destination('uno|R1','matutino','doctor','b');await destination('libre|R1','vespertino','service:piso');await tab('crear');const before=await state();
+  const roundtrip=await page.evaluate(s=>Rolero.migrateState(JSON.parse(JSON.stringify(s))),before);assert.deepEqual(roundtrip,before);await load(roundtrip);assert.deepEqual(await state(),before);await copy();
+ });
+ return{tab,open,state,ready,preview};
+}
+module.exports={flow,key,date};
+if(require.main===module)(async()=>{
+ const {chromium}=require('C:/Users/bardiostudio/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');let browser,page,original;const passed=[],errors=[],cleanupErrors=[];let failure=null;
+ const report=()=>fs.writeFileSync(path.join(out,'ui-results.json'),JSON.stringify({version:'1.5.0',passed,errors,cleanupErrors,failure,success:!failure&&!errors.length&&!cleanupErrors.length&&passed.length===5},null,2));
+ const check=async(name,fn)=>{console.log('TEST UI:',name);await fn();passed.push(name);report();console.log('PASS UI:',name);};
+ try{browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true});page=await browser.newPage({viewport:{width:390,height:844},locale:'es-MX',timezoneId:'America/Hermosillo'});page.setDefaultTimeout(15000);page.on('pageerror',e=>errors.push(e.message));await page.goto(pathToFileURL(path.resolve('app/src/main/assets/index.html')).href);await page.waitForFunction(()=>!!window.RoleroUI);original=await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage)));
+ const helpers=await flow(page,check,p=>p.evaluate(()=>{window.__qaCopiedText=undefined;window.Android={copyText:text=>window.__qaCopiedText=text};}));
+ await check('Controles legibles sin desbordes entre 360 y 1440 píxeles',async()=>{for(const width of [360,390,768,1440]){await page.setViewportSize({width,height:900});await helpers.tab('equipo');await helpers.open('r1-priorities');await helpers.open('r1-priority-'+encodeURIComponent('uno|R1'));await helpers.open('r1-priority-'+encodeURIComponent('uno|R1')+'-matutino');assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'equipo-mobile.png'),fullPage:true});await helpers.tab('crear');await helpers.open('qx-rooms');await helpers.open('qx-room-2');await page.screenshot({path:path.join(out,'crear-mobile.png'),fullPage:true});});assert.deepEqual(errors,[]);
+ }catch(e){failure={message:e.message,stack:e.stack};console.error(e);process.exitCode=1;if(page)await page.screenshot({path:path.join(out,'failure.png'),fullPage:true}).catch(()=>{});}
+ finally{try{if(page&&original){await page.evaluate(entries=>{localStorage.clear();for(const [k,v]of Object.entries(entries))localStorage.setItem(k,v);},original);assert.deepEqual(await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage))),original);}}catch(e){cleanupErrors.push(e.message);process.exitCode=1;}if(browser)await browser.close();report();}
+})().catch(e=>{console.error(e);process.exitCode=1;});
