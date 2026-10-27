@@ -4,7 +4,7 @@ const { defaults } = require('../app/src/main/assets/data.js');
 const R = require('../app/src/main/assets/engine.js');
 
 const person = id => ({ name: 'Integrante ' + id, grade: 1 });
-const at = (state, date, shift = 'matutino') => R.generate(state, { date, shift });
+const at = (state, date, shift = 'matutino') => require('./planned-role.cjs')(state, { date, shift });
 const assigned = result => result.groups.flatMap(group => [...group.doctors.flatMap(doctor => doctor.residents), ...group.support]);
 const dateAt = offset => new Date(Date.UTC(2026, 9, 26 + offset, 12)).toISOString().slice(0, 10);
 

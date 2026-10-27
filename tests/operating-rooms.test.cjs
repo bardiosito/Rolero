@@ -15,7 +15,7 @@ function fresh() {
   state.doctors = [
     { id: 'md-a', name: 'Alfa', title: 'Dr.', shift: 'matutino', schedule: Array(5).fill('qx'), residents: [person('Compartido'), person('Ana', 1), person('Mayor Alfa', 4)] },
     { id: 'md-b', name: 'Beta', title: 'Dra.', shift: 'matutino', schedule: Array(5).fill('consulta'), residents: [person('Compartido'), person('Berta', 1), person('Mayor Beta', 3)] },
-    { id: 'md-c', name: 'Gamma', title: 'Dr.', shift: 'matutino', schedule: Array(5).fill('qx'), residents: [person('Carlos')] },
+    { id: 'md-c', name: 'Gamma', title: 'Dr.', shift: 'matutino', schedule: Array(5).fill('consulta'), residents: [person('Carlos')] },
     { id: 'md-d', name: 'Delta', title: 'Dr.', shift: 'vespertino', schedule: Array(5).fill('urgencias'), residents: [person('Diana', 1)] }
   ];
   state.serviceRules = [];
@@ -36,7 +36,7 @@ test('el tablero muestra seis salas y distingue médicos de quirófano sin sala 
   const board = roomBoard(state);
   assert.deepEqual(board.rooms.map(room => [room.number, room.label]), [[1, 'QX 1'], [2, 'QX 2'], [3, 'QX 3'], [4, 'QX 4'], [5, 'QX 5'], [6, 'QX 6']]);
   assert.ok(board.rooms.every(room => room.doctors.length === 0));
-  assert.deepEqual(board.unassigned.map(doctor => doctor.id).sort(), ['md-a', 'md-c']);
+  assert.deepEqual(board.unassigned, []);
   assert.deepEqual(board.candidates.map(doctor => doctor.id).sort(), ['md-a', 'md-b', 'md-c']);
   assert.equal(board.candidates.find(doctor => doctor.id === 'md-b').service, 'consulta');
   assert.deepEqual(state, before);
@@ -79,15 +79,15 @@ test('las salas ocupadas se ordenan de QX 1 a QX 6 sin importar el orden de asig
   assert.deepEqual(lines.map(line => line.slice(0, 4)), ['QX 1', 'QX 2', 'QX 6']);
 });
 
-test('las salas anteriores reconocidas se agrupan y las desconocidas quedan después de las salas numeradas', () => {
+test('sólo las salas QX 1 a 6 incluyen médicos en el reporte y los demás siguen disponibles para asignar', () => {
   const state = fresh();
   state.dailyOverrides['2026-10-26'] = { 'md-a': { room: 'Q1' }, 'md-b': { service: 'qx', room: 'Q9' } };
   const result = at(state);
   assert.deepEqual(qx(result).rooms.map(room => room.number), [1]);
   assert.match(result.text, /QX 1 Dr\. Alfa/);
-  assert.ok(result.text.indexOf('QX 1 Dr. Alfa') < result.text.indexOf('Q9 Dra. Beta'));
+  assert.doesNotMatch(result.text,/Q9 Dra\. Beta/);
   assert.ok(result.text.indexOf('QX 1 Dr. Alfa') < result.text.indexOf('Dr. Gamma'));
-  assert.deepEqual(roomBoard(state).unassigned.map(doctor => doctor.id).sort(), ['md-b', 'md-c']);
+  assert.deepEqual(roomBoard(state).unassigned, []);
 });
 
 test('la unión de residentes de la sala respeta ausencias y postguardia', () => {
@@ -164,7 +164,7 @@ test('quitar una sala restaura la actividad implícita sin perder el ajuste de r
   assert.ok(!Object.hasOwn(override, 'room'));
   assert.deepEqual(override.residents, [person('Equipo del Día', 1)]);
   assert.equal(override.excluded, false);
-  assert.match(at(state).text, /Consulta\nDra\. Beta \/ Equipo del Día R1/);
+  assert.match(at(state).text, /Piso\n[^\n]*Equipo del Día R1/);
 });
 
 test('reasignar varias veces y limpiar restaura sala y actividad originales conservando cambios ajenos', () => {

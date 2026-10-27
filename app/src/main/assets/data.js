@@ -137,6 +137,7 @@
     dutySelection: { guardGroupId: 'A' },
     mobileAssignments: { matutino: [], vespertino: [] },
     r1Priorities: {},
+    dailyR1Rooms: {},
     settings: { showDoctors: true, includeGuards: false, includeServiceSupport: true, includeDate: false, excludePostGuard: true, postGuardMode: 'previous', floorR1Reminder: false },
     history: [],
     sourceNotes: [
@@ -146,7 +147,8 @@
       'Se conservan las actividades de residencia de Quiroz y Leyva, las coberturas de García M. y Beltrán F., y el horario manual de Esquer.',
       'Las ausencias de médicos pueden tener cobertura de cualquier turno. Las ausencias de residentes se aplican a todos sus servicios durante las fechas registradas.',
       'Las salas QX 1 a QX 6 se asignan por fecha y turno. Cada médico conserva su línea y sus residentes; en una misma sala se respeta el orden en que se agregaron.',
-      'El rol de cada R1 puede configurarse por turno en Equipo: servicio o médico de base. Los servicios lo distribuyen entre los médicos disponibles; si el destino no está disponible, queda en Piso.'
+      'El rol de cada R1 puede configurarse por turno en Equipo: servicio o médico de base, incluyendo Urgencias. Los residentes disponibles sin destino quedan en Piso.',
+      'Los médicos de quirófano sin sala válida se omiten sólo del rol consultado. Sus R2 pasan a otra sala, Consulta, Urgencias o Piso; los R1 de una sala compartida conservan esa sala mientras haya otro médico disponible.'
     ]
   };
 

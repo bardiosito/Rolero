@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { defaults } = require('../app/src/main/assets/data.js');
 const R = require('../app/src/main/assets/engine.js');
 const fresh = () => structuredClone(defaults);
-const at = (state, date = '2026-10-26', shift = 'matutino', rest = {}) => R.generate(state, { date, shift, ...rest });
+const at = (state, date = '2026-10-26', shift = 'matutino', rest = {}) => require('./planned-role.cjs')(state, { date, shift, ...rest });
 
 test('las imágenes se conservan: 18 médicos, apoyos y excepciones', () => {
   assert.equal(defaults.doctors.length, 18);
@@ -70,18 +70,20 @@ test('fin de semana sólo usa asignaciones manuales y no inventa horario de serv
   assert.equal(at(state,'2026-10-25').groups.length,0);
   state.dailyOverrides['2026-10-25'] = {cerda:{service:'qx'}};
   const result = at(state,'2026-10-25');
-  assert.equal(result.groups.length,1);
-  assert.equal(result.groups[0].support.length,0);
+  assert.ok(result.groups.some(group => group.service === 'piso'));
+  assert.deepEqual(result.groups.flatMap(group => group.doctors).map(doctor => doctor.id), ['cerda']);
   assert.match(result.text,/Cerda/);
   assert.ok(result.warnings.some(w => /lunes.*viernes|fin de semana/i.test(w)));
 });
 
-test('apoyos con fecha: 1–16, 19–30 y huecos17–18/31 permanecen exactos', () => {
+test('rangos de las fuentes se conservan y los R1 sin destino del día pasan a Piso', () => {
   const state = fresh();
   assert.match(at(state,'2026-10-16').text,/González R1/);
-  assert.doesNotMatch(at(state,'2026-10-19').text,/González R1/);
+  const source = state.serviceRules.find(rule => rule.id === 'piso_matutino');
+  assert.ok(!R.availableResidents(state,source.residents,'2026-10-19').some(person => person.name === 'González'));
+  assert.match(at(state,'2026-10-19').text,/Piso\n[^\n]*González R1/);
   assert.match(at(state,'2026-10-19').text,/Carlos R1/);
-  assert.doesNotMatch(at(state,'2026-12-31').text,/Carlos R1/);
+  assert.match(at(state,'2026-12-31').text,/Piso\n[^\n]*Carlos R1/);
 });
 
 test('la guardia resuelta corresponde al grupo elegido y no se publica dentro del rol', () => {
@@ -92,7 +94,9 @@ test('la guardia resuelta corresponde al grupo elegido y no se publica dentro de
   const result = at(state,'2026-10-26','matutino',{includeGuards:true});
   assert.equal(result.guardStatus,'group');
   assert.deepEqual(result.guards.map(R.personKey).sort(),R.parseGuardMembers('Nuevo R1, Otro R2').map(R.personKey).sort());
-  assert.doesNotMatch(result.text,/Guardia|Otro R2|Nuevo R1/);
+  assert.doesNotMatch(result.text,/Guardia/);
+  assert.match(result.text,/Piso\n[^\n]*Otro R2/);
+  assert.match(result.text,/Piso\n[^\n]*Nuevo R1/);
   assert.doesNotMatch(result.text,/Senior R4/);
 });
 

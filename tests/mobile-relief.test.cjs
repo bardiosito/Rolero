@@ -5,7 +5,7 @@ const R = require('../app/src/main/assets/engine.js');
 const person = (name, grade = 2) => ({ name, grade });
 const key = (name, grade = 2) => R.personKey(person(name, grade));
 const keys = residents => residents.map(R.personKey);
-const at = (state, date = '2026-10-26', shift = 'matutino') => R.generate(state, { date, shift });
+const at = (state, date = '2026-10-26', shift = 'matutino') => require('./planned-role.cjs')(state, { date, shift });
 const assigned = result => result.groups.flatMap(group => [...group.doctors.flatMap(doctor => doctor.residents), ...group.support]);
 const relief = (state, mobile = 'Reserva Uno', fixed = 'Hernández', shift = 'matutino', mobileGrade = 2, fixedGrade = 2) =>
   R.setMobileAssignment(state, shift, { residentKey: key(mobile, mobileGrade), fixedResidentKey: key(fixed, fixedGrade) });

@@ -168,7 +168,7 @@
         var residents = doctor.formattedResidents || engine.formatResidents(doctor.residents || []);
         return '<div class="qx-room-doctor"><div><strong>' + h(operatingDoctorLabel(doctor)) + '</strong>' + (residents ? '<small>' + h(residents) + '</small>' : '') + '</div><button type="button" class="delete-link" data-action="clear-qx-room" data-id="' + h(operatingDoctorId(doctor)) + '">Restablecer actividad</button></div>';
       }).join('') + '</div>' : '') + '<form class="qx-room-form" data-form="qx-room" data-room="' + room.number + '"><label>Médico<select name="doctorId" required aria-label="Médico para ' + h(room.label) + '"><option value="">Seleccionar médico</option>' + candidates.map(function (doctor) { return '<option value="' + h(operatingDoctorId(doctor)) + '">' + h(operatingDoctorLabel(doctor)) + '</option>'; }).join('') + '</select></label><button class="button soft small" type="submit"' + (!candidates.length ? ' disabled' : '') + '>Asignar a ' + h(room.label) + '</button></form></div></details>';
-    }).join('') + (result.unassigned.length ? '<p class="qx-unassigned">Sin sala: ' + h(result.unassigned.map(operatingDoctorLabel).join(', ')) + '</p>' : '') + '</div></details>';
+    }).join('') + '</div></details>';
   }
   function renderPostGuard(result) {
     var guard = (state.guardGroups || []).find(function (group) { return group.id === result.guardGroup; });
@@ -183,7 +183,8 @@
     var absence = absenceForDoctor(doctor, ui.date);
     var assignment = typeof engine.resolveDoctorAssignment === 'function' ? engine.resolveDoctorAssignment(state, doctor.id, ui.date) : { doctor: doctor, covering: false };
     var displayDoctor = assignment ? assignment.doctor : doctor;
-    var excluded = !!override.excluded || !assignment;
+    var needsRoom = service === 'qx' && !engine.normalizeOperatingRoom(override.room);
+    var excluded = !!override.excluded || !assignment || needsRoom;
     var postGuardKeys = new Set((ui.result && ui.result.postGuardExcluded || []).filter(function (person) { return Number(person.grade) <= 2; }).map(function (person) { return engine.personKey(person); }));
     var postGuardResidents = state.settings.excludePostGuard !== false ? residents.filter(function (person) { return Number(person.grade) <= 2 && postGuardKeys.has(engine.personKey(person)); }) : [];
     var generatedDoctor = (ui.result && ui.result.groups || []).reduce(function (list, group) { return list.concat(group.doctors); }, []).find(function (person) { return person.id === doctor.id; });
@@ -191,6 +192,7 @@
     var detail = visibleResidents.length ? engine.formatResidents(visibleResidents) : 'Sin residentes disponibles';
     if (assignment && assignment.covering) detail = 'Cubre a ' + doctorLabel(doctor) + ' · ' + detail;
     if (postGuardResidents.length) detail += ' · Postguardia: ' + residentText(postGuardResidents);
+    if (needsRoom) detail = 'Elige una sala para incluirlo en este rol';
     return '<details class="doctor-card' + (excluded ? ' is-excluded' : '') + '" data-detail="day-' + h(doctor.id) + '"><summary><span class="avatar">' + h(initials(doctor.name)) + '</span><span class="doctor-summary"><span class="doctor-name">' + h(doctorLabel(displayDoctor)) + '</span><div class="doctor-sub">' + h(absence && !(assignment && assignment.covering) ? 'Ausencia registrada · ' + (absence.note || 'No disponible') : override.excluded ? 'Excluido de este día' : detail) + '</div></span><span class="service-tag ' + h(service) + '">' + h(SHORT_SERVICES[service] || service) + '</span></summary><div class="doctor-fields">' +
       (absence ? '<div class="info-banner warning-banner">' + icon('info') + '<div>Ausencia del ' + h(dateLabel(absence.start, { day: 'numeric', month: 'short' })) + ' al ' + h(dateLabel(absence.end, { day: 'numeric', month: 'short' })) + '. Puedes modificarla en Equipo.</div></div>' : '') +
       (postGuardResidents.length ? '<div class="info-banner">' + icon('moon') + '<div><strong>' + h(residentText(postGuardResidents)) + '</strong>: se excluye' + (postGuardResidents.length > 1 ? 'n' : '') + ' del texto por postguardia. La combinación fija se conserva.</div></div>' : '') +
@@ -247,8 +249,7 @@
         var target = configured ? resident.priorities[shift][0] || 'service:piso' : '';
         var destination = target.indexOf('doctor:') === 0 ? 'doctor' : target;
         var doctorId = destination === 'doctor' ? target.slice(7) : '';
-        var options = [['', 'Conservar rol actual'], ['service:piso', 'Piso'], ['service:consulta', 'Consulta externa'], ['service:qx', 'Quirófano'], ['doctor', 'Médico de base']];
-        if (destination === 'service:urgencias') options.push(['service:urgencias', 'Urgencias (rol anterior)']);
+        var options = [['', 'Conservar rol actual'], ['service:piso', 'Piso'], ['service:consulta', 'Consulta externa'], ['service:qx', 'Quirófano'], ['service:urgencias', 'Urgencias'], ['doctor', 'Médico de base']];
         return '<details class="priority-shift" data-detail="r1-priority-' + encoded + '-' + shift + '"><summary>' + cap(shift) + '</summary><form class="form-stack" data-form="r1-priorities" data-key="' + h(resident.key) + '" data-shift="' + shift + '"><label>Destino<select name="destination">' + options.map(function (option) { return '<option value="' + option[0] + '"' + (destination === option[0] ? ' selected' : '') + '>' + option[1] + '</option>'; }).join('') + '</select></label><label class="r1-doctor-field"' + (destination !== 'doctor' ? ' hidden' : '') + '>Médico de base<select name="doctorId"' + (destination === 'doctor' ? ' required' : ' disabled') + '><option value="">Seleccionar médico</option>' + state.doctors.filter(function (doctor) { return doctor.shift === shift; }).map(function (doctor) { return '<option value="' + h(doctor.id) + '"' + (doctor.id === doctorId ? ' selected' : '') + '>' + h(doctorLabel(doctor)) + '</option>'; }).join('') + '</select></label><button class="button soft full" type="submit">' + icon('check') + 'Guardar rol</button></form></details>';
       }).join('') + '</div></details>';
     }).join('') : '<p class="small-caption">No hay residentes R1 registrados.</p>') + '</div></div></details>';

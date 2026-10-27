@@ -5,7 +5,7 @@ const R = require('../app/src/main/assets/engine.js');
 
 const person = (name, grade = 1, extra = {}) => ({ name, grade, ...extra });
 const key = (name = 'Ana', grade = 1) => R.personKey(person(name, grade));
-const at = (state, date = '2026-10-26', shift = 'matutino') => R.generate(state, { date, shift });
+const at = (state, date = '2026-10-26', shift = 'matutino') => require('./planned-role.cjs')(state, { date, shift });
 const entries = result => result.groups.flatMap(group => group.doctors);
 const has = (people, personKey) => people.some(resident => R.personKey(resident) === personKey);
 const residentLists = state => [
@@ -91,14 +91,14 @@ test('un alta nueva con médicos por turno se guarda y aparece en el rol de cada
   assert.match(at(restored, '2026-10-29', 'vespertino').text, /Dr\. Médico Cuatro \/ Nuevo Residente R2/);
 });
 
-test('un alta sin médico queda en su guardia y no inventa un equipo fijo ni un apoyo', () => {
+test('un R1 nuevo sin médico conserva su guardia y pasa a Piso sin inventar un médico', () => {
   const state = fresh();
   R.addResident(state, { name: 'Reserva Nueva', grade: 1, guardGroupId: 'B' });
   const resident = R.residentRoster(state).find(resident => resident.key === key('Reserva Nueva'));
   assert.equal(resident.guardGroupId, 'B');
   assert.deepEqual(resident.doctorIds, { matutino: [], vespertino: [] });
   assert.deepEqual(resident.serviceRuleIds, []);
-  for (const shift of ['matutino', 'vespertino']) assert.doesNotMatch(at(state, '2026-10-29', shift).text, /Reserva Nueva/);
+  for (const shift of ['matutino', 'vespertino']) assert.match(at(state, '2026-10-29', shift).text, /Piso\n[^\n]*Reserva Nueva R1/);
 });
 
 test('elegir un junior fijo existente lo incorpora a una guardia sin borrar sus referencias', () => {

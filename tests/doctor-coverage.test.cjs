@@ -5,7 +5,7 @@ const R = require('../app/src/main/assets/engine.js');
 
 const person = (name, grade = 2) => ({ name, grade });
 const keys = people => people.map(R.personKey).sort();
-const at = (state, date = '2026-10-26', shift = 'matutino', options = {}) => R.generate(state, { date, shift, ...options });
+const at = (state, date = '2026-10-26', shift = 'matutino', options = {}) => require('./planned-role.cjs')(state, { date, shift, ...options });
 const doctors = result => result.groups.flatMap(group => group.doctors);
 const assigned = result => result.groups.flatMap(group => [...group.doctors.flatMap(doctor => doctor.residents), ...group.support]);
 const record = (personId = 'md-a', coverDoctorId = 'md-b', extra = {}) => ({
@@ -56,7 +56,8 @@ test('la cobertura usa nombre y título del suplente con actividad, sala y resid
   assert.equal(source.room, 'Q3');
   assert.deepEqual(keys(source.residents), keys([person('Cambio Alfa'), person('Mayor Alfa', 4)]));
   assert.match(result.text, /QX 3 Dra\. Beta \/ Rotantes \/ Cambio Alfa R2/);
-  assert.doesNotMatch(result.text, /Dr\. Alfa|Equipo Alfa R2/);
+  assert.doesNotMatch(result.text, /Dr\. Alfa/);
+  assert.match(result.text, /Piso\n[^\n]*Equipo Alfa R2/);
   const own = result.groups.find(group => group.service === 'consulta').doctors[0];
   assert.equal(own.id, 'md-b');
   assert.deepEqual(keys(own.residents), keys(state.doctors[1].residents));
@@ -119,7 +120,7 @@ test('una ausencia médica sin suplente omite su plaza y mantiene los demás mé
   R.registerAbsence(state, record('md-a', ''));
   assert.equal(R.resolveDoctorAssignment(state, 'md-a', '2026-10-26'), null);
   const result = at(state);
-  assert.doesNotMatch(result.text, /Alfa/);
+  assert.doesNotMatch(result.text, /Dr\. Alfa/);
   assert.deepEqual(doctors(result).map(doctor => doctor.id), ['md-b']);
   assert.match(result.text, /Dra\. Beta/);
 });

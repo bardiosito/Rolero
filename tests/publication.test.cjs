@@ -5,7 +5,7 @@ const R = require('../app/src/main/assets/engine.js');
 
 const reminder = '(Resto de r1 al terminar actividades)';
 const fresh = () => structuredClone(defaults);
-const at = (state, date = '2026-10-26', shift = 'matutino', options = {}) => R.generate(state, { date, shift, ...options });
+const at = (state, date = '2026-10-26', shift = 'matutino', options = {}) => require('./planned-role.cjs')(state, { date, shift, ...options });
 const allResidents = result => result.groups.flatMap(group => [...group.doctors.flatMap(doctor => doctor.residents), ...group.support]);
 
 test('el estado inicial v3 publica médicos, excluye postguardia y deja apagado el aviso de Piso', () => {
@@ -30,7 +30,8 @@ test('las preferencias antiguas y opciones de publicación no ocultan médicos n
   const result = at(state, '2026-10-26', 'matutino', { showDoctors: false, excludePostGuard: false, includeGuards: true, includeDate: true });
   assert.equal(result.text, expected.text);
   assert.match(result.text, /Dra\. Cerda/);
-  assert.doesNotMatch(result.text, /Ibarra R2|Chávez R1|Guardia Nueva|Guardia A|2026|octubre|Lunes/i);
+  assert.doesNotMatch(result.text, /Ibarra R2|Chávez R1|\nGuardia A\n|2026|octubre|Lunes/i);
+  assert.match(result.text,/Piso\n[^\n]*Guardia Nueva R1/);
   assert.ok(!allResidents(result).some(person => ['ibarra|R2', 'chavez|R1'].includes(R.personKey(person))));
   assert.deepEqual(result.postGuardExcluded.map(R.personKey).sort(), ['chavez|R1', 'ibarra|R2']);
 });

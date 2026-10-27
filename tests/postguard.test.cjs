@@ -4,7 +4,7 @@ const { defaults } = require('../app/src/main/assets/data.js');
 const R = require('../app/src/main/assets/engine.js');
 const key = (name, grade = 2) => R.personKey({ name, grade });
 const keys = residents => residents.map(R.personKey).sort();
-const at = (state, date = '2026-10-26', shift = 'matutino', options = {}) => R.generate(state, { date, shift, ...options });
+const at = (state, date = '2026-10-26', shift = 'matutino', options = {}) => require('./planned-role.cjs')(state, { date, shift, ...options });
 const assigned = result => result.groups.flatMap(group => [...group.doctors.flatMap(doctor => doctor.residents), ...group.support]);
 
 function fresh() {
