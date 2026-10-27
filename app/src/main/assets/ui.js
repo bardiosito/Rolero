@@ -34,7 +34,7 @@
   function cloneDefaults() { return JSON.parse(JSON.stringify(window.ROLERO_DEFAULTS)); }
   function normalize(data) {
     if (!data || typeof data !== 'object' || Array.isArray(data) || !Array.isArray(data.doctors)) throw new Error('El archivo no contiene un respaldo de Rolero.');
-    if (typeof engine.migrateState === 'function') data = engine.migrateState(data);
+    if (typeof engine.migrateState === 'function') data = engine.migrateState(data, { referenceDate: localDate() });
     if (data.schemaVersion !== 3) throw new Error('Esta versión del respaldo no es compatible.');
     data.doctors.forEach(function (doctor) {
       if (!doctor || typeof doctor.id !== 'string' || typeof doctor.name !== 'string' || !Array.isArray(doctor.schedule) || doctor.schedule.length !== 5 || !['matutino', 'vespertino'].includes(doctor.shift)) throw new Error('El respaldo contiene un médico o un rol semanal incompleto.');
@@ -149,11 +149,29 @@
       '<section class="card selection-card"><div class="selection-grid"><div><div class="field-title"><span>FECHA DEL ROL</span><button class="small-action" data-action="today">Hoy</button></div><label aria-label="Fecha del rol"><input type="date" id="create-date" value="' + h(ui.date) + '" required></label></div><div><div class="field-title">TURNO</div><div class="segmented" aria-label="Seleccionar turno"><button data-action="shift" data-shift="matutino" class="' + (ui.shift === 'matutino' ? 'active' : '') + '" aria-pressed="' + (ui.shift === 'matutino') + '">' + icon('sun') + 'Matutino</button><button data-action="shift" data-shift="vespertino" class="' + (ui.shift === 'vespertino' ? 'active' : '') + '" aria-pressed="' + (ui.shift === 'vespertino') + '">' + icon('moon') + 'Vespertino</button></div></div></div></section>' +
       renderPostGuard(result) +
       '<details class="section-accordion" data-detail="organize-turn"><summary>Organiza el turno</summary><div class="accordion-content doctor-list">' + (doctors.length ? doctors.map(function (doctor) { return renderDayDoctor(doctor, weekday); }).join('') : '<div class="quiet-empty">No hay médicos en este turno.<button class="button soft space-top" data-action="tab" data-tab="equipo">Ir a Equipo</button></div>') + '</div></details>' +
-      '<section class="card preview-card" aria-label="Vista previa"><div class="preview-head"><h2>Vista previa</h2></div><div class="preview-controls"><label class="switch-row" for="floor-r1-switch"><span>Resto de R1 al terminar actividades</span><input type="checkbox" role="switch" id="floor-r1-switch" data-setting="floorR1Reminder"' + (state.settings.floorR1Reminder ? ' checked' : '') + '><span class="switch-track" aria-hidden="true"></span></label></div><div class="preview-text-wrap"><textarea id="preview-text" class="preview-text" aria-label="Texto del rol, editable" spellcheck="false">' + h(ui.preview) + '</textarea></div><div class="preview-footer">' + reportActions() + '</div></section>';
+      renderOperatingRooms() + '<section class="card preview-card" aria-label="Vista previa"><div class="preview-head"><h2>Vista previa</h2></div><div class="preview-controls"><label class="switch-row" for="floor-r1-switch"><span>Resto de R1 al terminar actividades</span><input type="checkbox" role="switch" id="floor-r1-switch" data-setting="floorR1Reminder"' + (state.settings.floorR1Reminder ? ' checked' : '') + '><span class="switch-track" aria-hidden="true"></span></label></div><div class="preview-text-wrap"><textarea id="preview-text" class="preview-text" aria-label="Texto del rol, editable" spellcheck="false">' + h(ui.preview) + '</textarea></div><div class="preview-footer">' + reportActions() + '</div></section>';
+  }
+  function operatingDoctorId(doctor) { return doctor.sourceDoctorId || doctor.id; }
+  function operatingDoctorLabel(doctor) {
+    var label = doctorLabel(doctor);
+    if (doctor.covering) {
+      var source = state.doctors.find(function (person) { return person.id === operatingDoctorId(doctor); });
+      label += ' · cubre a ' + (source ? doctorLabel(source) : doctor.originalName || 'otro médico');
+    }
+    return label;
+  }
+  function renderOperatingRooms() {
+    var result = engine.operatingRooms(state, { date: ui.date, shift: ui.shift });
+    return '<details class="section-accordion qx-rooms" data-detail="qx-rooms"><summary>Salas de quirófano</summary><div class="accordion-content qx-room-grid">' + result.rooms.map(function (room) {
+      var candidates = result.candidates.filter(function (doctor) { return Number(doctor.currentRoom) !== room.number; });
+      return '<details class="qx-room" data-detail="qx-room-' + room.number + '"><summary><strong>' + h(room.label) + '</strong><span>' + h(room.doctors.map(doctorLabel).join(', ') || 'Sin asignar') + '</span></summary><div class="qx-room-content">' + (room.doctors.length ? '<div class="qx-room-members">' + room.doctors.map(function (doctor) {
+        var residents = doctor.formattedResidents || engine.formatResidents(doctor.residents || []);
+        return '<div class="qx-room-doctor"><div><strong>' + h(operatingDoctorLabel(doctor)) + '</strong>' + (residents ? '<small>' + h(residents) + '</small>' : '') + '</div><button type="button" class="delete-link" data-action="clear-qx-room" data-id="' + h(operatingDoctorId(doctor)) + '">Restablecer actividad</button></div>';
+      }).join('') + '</div>' : '') + '<form class="qx-room-form" data-form="qx-room" data-room="' + room.number + '"><label>Médico<select name="doctorId" required aria-label="Médico para ' + h(room.label) + '"><option value="">Seleccionar médico</option>' + candidates.map(function (doctor) { return '<option value="' + h(operatingDoctorId(doctor)) + '">' + h(operatingDoctorLabel(doctor)) + '</option>'; }).join('') + '</select></label><button class="button soft small" type="submit"' + (!candidates.length ? ' disabled' : '') + '>Asignar a ' + h(room.label) + '</button></form></div></details>';
+    }).join('') + (result.unassigned.length ? '<p class="qx-unassigned">Sin sala: ' + h(result.unassigned.map(operatingDoctorLabel).join(', ')) + '</p>' : '') + '</div></details>';
   }
   function renderPostGuard(result) {
-    var selection = state.dutySelection || {};
-    var guard = (state.guardGroups || []).find(function (group) { return group.id === selection.guardGroupId; });
+    var guard = (state.guardGroups || []).find(function (group) { return group.id === result.guardGroup; });
     var post = (state.guardGroups || []).find(function (group) { return group.id === result.postGuardGroup; });
     return '<div class="duty-summary" aria-label="Guardia y postguardia"><span>Guardia <strong>' + h(guard ? guard.name || guard.id : 'Sin seleccionar') + '</strong></span><span>Postguardia <strong>' + h(post ? post.name || post.id : 'Sin seleccionar') + '</strong></span></div>';
   }
@@ -175,7 +193,7 @@
     return '<details class="doctor-card' + (excluded ? ' is-excluded' : '') + '" data-detail="day-' + h(doctor.id) + '"><summary><span class="avatar">' + h(initials(doctor.name)) + '</span><span class="doctor-summary"><span class="doctor-name">' + h(doctorLabel(displayDoctor)) + '</span><div class="doctor-sub">' + h(absence && !(assignment && assignment.covering) ? 'Ausencia registrada · ' + (absence.note || 'No disponible') : override.excluded ? 'Excluido de este día' : detail) + '</div></span><span class="service-tag ' + h(service) + '">' + h(SHORT_SERVICES[service] || service) + '</span></summary><div class="doctor-fields">' +
       (absence ? '<div class="info-banner warning-banner">' + icon('info') + '<div>Ausencia del ' + h(dateLabel(absence.start, { day: 'numeric', month: 'short' })) + ' al ' + h(dateLabel(absence.end, { day: 'numeric', month: 'short' })) + '. Puedes modificarla en Equipo.</div></div>' : '') +
       (postGuardResidents.length ? '<div class="info-banner">' + icon('moon') + '<div><strong>' + h(residentText(postGuardResidents)) + '</strong>: se excluye' + (postGuardResidents.length > 1 ? 'n' : '') + ' del texto por postguardia. La combinación fija se conserva.</div></div>' : '') +
-      '<label>Actividad de este día<select data-day-doctor="' + h(doctor.id) + '" data-day-field="service">' + serviceOptions(service) + '</select></label>' + (service === 'qx' ? '<label>Sala de quirófano (opcional)<input data-day-doctor="' + h(doctor.id) + '" data-day-field="room" value="' + h(override.room || '') + '" placeholder="Ej. Q1 o Q5" maxlength="24"><small>Se escribe antes del médico en el texto final.</small></label>' : '') + '<label class="check-row"><input type="checkbox" data-day-doctor="' + h(doctor.id) + '" data-day-field="excluded"' + (override.excluded ? ' checked' : '') + '>Excluir de este rol</label>' +
+      '<label>Actividad de este día<select data-day-doctor="' + h(doctor.id) + '" data-day-field="service">' + serviceOptions(service) + '</select></label>' + '<label class="check-row"><input type="checkbox" data-day-doctor="' + h(doctor.id) + '" data-day-field="excluded"' + (override.excluded ? ' checked' : '') + '>Excluir de este rol</label>' +
       (Object.keys(override).length ? '<button class="small-action" data-action="reset-day" data-id="' + h(doctor.id) + '" style="text-align:left">Restablecer el rol fijo para este médico</button>' : '') + '</div></details>';
   }
   function renderTeam() {
@@ -273,7 +291,7 @@
     var groups = state.guardGroups || [];
     var roster = residentRoster();
     var ungrouped = roster.filter(function (resident) { return !resident.guardGroupId; });
-    return hero('', 'Guardias', '') + '<section class="card guard-setup form-stack"><label>Guardia actual<select data-duty-field="guardGroupId" aria-label="Guardia actual">' + guardGroupOptions((state.dutySelection || {}).guardGroupId) + '</select></label><label>Número de guardias<select id="guard-count" aria-label="Número de guardias">' + [3, 4, 5, 6].map(function (number) { return '<option value="' + number + '"' + (groups.length === number ? ' selected' : '') + '>' + number + '</option>'; }).join('') + '</select></label></section><div class="guard-groups-grid">' + groups.map(function (group) { return renderGuardGroup(group, roster); }).join('') + '</div>' + (ungrouped.length ? '<details class="section-accordion" data-detail="residents-ungrouped"><summary>Residentes sin guardia</summary><div class="accordion-content doctor-list">' + ungrouped.map(renderResident).join('') + '</div></details>' : '');
+    return hero('', 'Guardias', '') + '<section class="card guard-setup form-stack"><label>Guardia actual<select data-duty-field="guardGroupId" aria-label="Guardia actual">' + guardGroupOptions((state.dutySelection || {}).guardGroupId) + '</select></label><label>Fecha de esta guardia<input type="date" id="duty-reference-date" data-duty-field="referenceDate" value="' + h((state.dutySelection || {}).referenceDate || localDate()) + '" required></label><label>Número de guardias<select id="guard-count" aria-label="Número de guardias">' + [3, 4, 5, 6].map(function (number) { return '<option value="' + number + '"' + (groups.length === number ? ' selected' : '') + '>' + number + '</option>'; }).join('') + '</select></label></section><div class="guard-groups-grid">' + groups.map(function (group) { return renderGuardGroup(group, roster); }).join('') + '</div>' + (ungrouped.length ? '<details class="section-accordion" data-detail="residents-ungrouped"><summary>Residentes sin guardia</summary><div class="accordion-content doctor-list">' + ungrouped.map(renderResident).join('') + '</div></details>' : '');
   }
   function renderGuardGroup(group, roster) {
     var members = roster.filter(function (resident) { return resident.guardGroupId === group.id; });
@@ -367,6 +385,10 @@
     else if (action === 'today') { ui.date = localDate(); render(); }
     else if (action === 'copy' || action === 'share') publish(action);
     else if (action === 'add-doctor') showAddDoctor(button.dataset.shift);
+    else if (action === 'clear-qx-room') {
+      try { engine.clearOperatingRoom(state, { date: ui.date, shift: ui.shift, doctorId: button.dataset.id }); save(); render(); toast('Actividad restablecida.'); }
+      catch (error) { toast(error.message); }
+    }
     else if (action === 'remove-resident') retireResident(button.dataset.key, false);
     else if (action === 'promote-resident') {
       var resident = residentRoster().find(function (person) { return person.key === button.dataset.key; });
@@ -430,9 +452,14 @@
         state.dailyOverrides[ui.date] = state.dailyOverrides[ui.date] || {};
         var override = state.dailyOverrides[ui.date][doctorId] = state.dailyOverrides[ui.date][doctorId] || {};
         override[field] = value;
+        if (field === 'service') { delete override.operatingRoomPrevious; if (value !== 'qx') delete override.room; }
         save(); render();
       } else if (input.id === 'guard-count') changeGroupCount(Number(input.value), false);
-      else if (input.dataset.dutyField) { state.dutySelection = { guardGroupId: input.value }; save(); render(); }
+      else if (input.dataset.dutyField) {
+        var guardSelection = app.querySelector('[data-duty-field="guardGroupId"]');
+        var referenceDate = document.getElementById('duty-reference-date');
+        engine.setDutyReference(state, guardSelection.value, referenceDate.value); save(); render();
+      }
       else if (input.id === 'backup-file' && input.files && input.files[0]) {
         var file = input.files[0];
         if (file.size > 5000000) { toast('El archivo es demasiado grande para un respaldo de Rolero.'); input.value = ''; return; }
@@ -454,7 +481,10 @@
     if (!element.reportValidity()) return;
     var form = new FormData(element);
     try {
-      if (element.id === 'add-doctor') {
+      if (element.dataset.form === 'qx-room') {
+        engine.setOperatingRoom(state, { date: ui.date, shift: ui.shift, doctorId: String(form.get('doctorId') || ''), room: Number(element.dataset.room) });
+        save(); render(); toast('Médico asignado a la sala.');
+      } else if (element.id === 'add-doctor') {
         var name = String(form.get('name') || '').trim(); if (!name) return;
         state.doctors.push({ id: id('doctor'), name: name, title: form.get('title'), shift: form.get('shift'), schedule: DAYS.map(function (_, index) { return form.get('day' + index); }), residents: [] });
         save(); closeModal(); render(); toast('Médico añadido.');
@@ -514,7 +544,12 @@
   try {
     if (!engine || !window.ROLERO_DEFAULTS) throw new Error('No se encontraron los datos iniciales de la aplicación.');
     var saved = localStorage.getItem(STORAGE_KEY);
-    try { state = saved ? normalize(JSON.parse(saved)) : normalize(cloneDefaults()); }
+    try {
+      var loaded = saved ? JSON.parse(saved) : cloneDefaults();
+      var needsDutyAnchor = !loaded.dutySelection || !Object.prototype.hasOwnProperty.call(loaded.dutySelection, 'referenceDate');
+      state = normalize(loaded);
+      if (!saved || needsDutyAnchor) save();
+    }
     catch (error) { state = normalize(cloneDefaults()); toast('No se pudo cargar el respaldo local. Se muestran los datos iniciales.'); }
     render();
   } catch (error) {

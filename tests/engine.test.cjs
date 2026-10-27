@@ -123,8 +123,8 @@ test('las salas y el formato final siguen los ejemplos entregados', () => {
     torres: {room:'Q5',residents:R.parseResidents('Mendoza R4, Pérez R2, Paredes R1')}
   };
   const result = at(state,'2026-10-28');
-  assert.match(result.text,/Q1 Dra\. Flores \/ Rotantes \/ Palencia R1/);
-  assert.match(result.text,/Q5 Dr\. Torres \/ Rotantes \/ Pérez R2 \/ Paredes R1/);
+  assert.match(result.text,/QX 1 Dra\. Flores \/ Rotantes \/ Palencia R1/);
+  assert.match(result.text,/QX 5 Dr\. Torres \/ Rotantes \/ Pérez R2 \/ Paredes R1/);
   assert.ok(!result.groups.find(g => g.service === 'qx').support.some(person => person.name === 'Paredes'));
   assert.doesNotMatch(at(state,'2026-10-28','vespertino').text,/todos los R1 al terminar actividades/);
 });

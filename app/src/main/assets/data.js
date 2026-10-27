@@ -139,11 +139,12 @@
     settings: { showDoctors: true, includeGuards: false, includeServiceSupport: true, includeDate: false, excludePostGuard: true, postGuardMode: 'previous', floorR1Reminder: false },
     history: [],
     sourceNotes: [
-      'El rol semanal y las combinaciones iniciales proceden de las imágenes proporcionadas. Revisa las asignaciones antes de confirmar el texto.',
-      'Las guardias se forman manualmente con R1 y R2: de tres a seis grupos, con hasta diez integrantes por grupo. La guardia anterior a la seleccionada queda de postguardia.',
+      'El rol semanal y las combinaciones iniciales proceden de las imágenes proporcionadas. Revisa las asignaciones antes de compartir el texto.',
+      'Las guardias se forman manualmente con R1 y R2: de tres a seis grupos, con hasta diez integrantes por grupo. Avanzan cada día desde la fecha de la guardia registrada; el grupo del día anterior queda de postguardia.',
       'Un móvil sólo sustituye al fijo emparejado cuando éste está ausente o de postguardia. Los R3 y R4 conservan su médico y aparecen como Rotantes.',
       'Se conservan las actividades de residencia de Quiroz y Leyva, las coberturas de García M. y Beltrán F., y el horario manual de Esquer.',
-      'Las ausencias de médicos pueden tener cobertura de cualquier turno. Las ausencias de residentes se aplican a todos sus servicios durante las fechas registradas.'
+      'Las ausencias de médicos pueden tener cobertura de cualquier turno. Las ausencias de residentes se aplican a todos sus servicios durante las fechas registradas.',
+      'Las salas QX 1 a QX 6 se asignan por fecha y turno; los médicos de una misma sala aparecen juntos con sus residentes.'
     ]
   };
 

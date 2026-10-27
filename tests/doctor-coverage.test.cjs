@@ -55,7 +55,7 @@ test('la cobertura usa nombre y título del suplente con actividad, sala y resid
   assert.equal(source.title, 'Dra.');
   assert.equal(source.room, 'Q3');
   assert.deepEqual(keys(source.residents), keys([person('Cambio Alfa'), person('Mayor Alfa', 4)]));
-  assert.match(result.text, /Q3 Dra\. Beta \/ Rotantes \/ Cambio Alfa R2/);
+  assert.match(result.text, /QX 3 Dra\. Beta \/ Rotantes \/ Cambio Alfa R2/);
   assert.doesNotMatch(result.text, /Dr\. Alfa|Equipo Alfa R2/);
   const own = result.groups.find(group => group.service === 'consulta').doctors[0];
   assert.equal(own.id, 'md-b');

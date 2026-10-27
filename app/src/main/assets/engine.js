@@ -20,10 +20,21 @@ function availableResidents(s,list,date){return activeOnDate(list,date).filter(p
 function guardRoster(s){return cleanResidents((s.guardGroups||[]).reduce((out,g)=>out.concat(g.members||[]),[])).filter(p=>p.grade<=2);}
 function fixedResidents(s,shift){const map=new Map();const add=(people,label)=>cleanResidents(people).filter(p=>p.grade<=2).forEach(p=>{const key=personKey(p);if(!map.has(key))map.set(key,{name:p.name,grade:p.grade,key,labels:[]});if(!map.get(key).labels.includes(label))map.get(key).labels.push(label);});(s.doctors||[]).filter(d=>d.shift===shift).forEach(d=>add(d.residents,(d.title||'Dr.')+' '+d.name));(s.serviceRules||[]).filter(r=>r.shift===shift).forEach(r=>add(r.residents,(SERVICES.find(x=>x[0]===r.service)||[null,r.service])[1]));return Array.from(map.values());}
 function selectedGroup(s){return(s.guardGroups||[]).find(g=>g.id===(s.dutySelection||{}).guardGroupId);}
-function resolveGuards(s,date){const g=selectedGroup(s);if(!g)return{guards:[],guardStatus:'pending',group:'',warning:'Elige la guardia actual.'};if(!g.members.length)return{guards:[],guardStatus:'pending',group:g.id,warning:'Configura los integrantes de la guardia '+g.id+'.'};return{guards:availableResidents(s,g.members,date),guardStatus:'group',group:g.id,warning:''};}
-function postGuard(s,date){dateParts(date);const groups=s.guardGroups||[],i=groups.findIndex(g=>g.id===(s.dutySelection||{}).guardGroupId);if(i<0||!groups.length)return{date:'',status:'pending',group:'',residents:[]};const g=groups[(i+groups.length-1)%groups.length];return{date:'',status:g.members.length?'group':'pending',group:g.id,residents:cleanResidents(g.members).filter(p=>p.grade<=2)};}
+function guardIndexForDate(state,date){
+ const target=dateParts(date),groups=state.guardGroups||[],selection=state.dutySelection||{},index=groups.findIndex(group=>group.id===selection.guardGroupId);
+ if(index<0||!groups.length)return-1;
+ if(!selection.referenceDate)return index;
+ const days=Math.round((target.utc-dateParts(selection.referenceDate).utc)/86400000);
+ return((index+days)%groups.length+groups.length)%groups.length;
+}
+function setDutyReference(state,guardGroupId,date){
+ if(!(state.guardGroups||[]).some(group=>group.id===guardGroupId)||typeof date!=='string'||!validDateRange(date,date))throw Error('Elige una guardia y una fecha válidas.');
+ state.dutySelection={...(state.dutySelection||{}),guardGroupId,referenceDate:date};return state.dutySelection;
+}
+function resolveGuards(s,date){const i=guardIndexForDate(s,date),g=(s.guardGroups||[])[i];if(!g)return{guards:[],guardStatus:'pending',group:'',warning:'Elige la guardia actual.'};if(!g.members.length)return{guards:[],guardStatus:'pending',group:g.id,warning:'Configura los integrantes de la guardia '+g.id+'.'};return{guards:availableResidents(s,g.members,date),guardStatus:'group',group:g.id,warning:''};}
+function postGuard(s,date){const parts=dateParts(date),groups=s.guardGroups||[],i=guardIndexForDate(s,date);if(i<0||!groups.length)return{date:'',status:'pending',group:'',residents:[]};const g=groups[(i+groups.length-1)%groups.length],previousDate=(s.dutySelection||{}).referenceDate?new Date(parts.utc.getTime()-86400000).toISOString().slice(0,10):'';return{date:previousDate,status:g.members.length?'group':'pending',group:g.id,residents:cleanResidents(g.members).filter(p=>p.grade<=2)};}
 function pruneMobiles(s,removed){SHIFTS.forEach(shift=>{s.mobileAssignments[shift]=(s.mobileAssignments[shift]||[]).filter(p=>!removed.has(p.residentKey));});}
-function setGuardGroupCount(s,count,options){if(!Number.isInteger(count)||count<3||count>6)throw Error('Elige entre 3 y 6 guardias.');const removed=(s.guardGroups||[]).slice(count);if(removed.some(g=>g.members.length)&&!(options&&options.confirmRemoval))throw Error('Las guardias que vas a quitar tienen integrantes. Confirma la reducción antes de continuar.');const keys=new Set(removed.reduce((out,g)=>out.concat(g.members.map(personKey)),[]));s.guardGroups=s.guardGroups.slice(0,count);while(s.guardGroups.length<count){const id=IDS[s.guardGroups.length];s.guardGroups.push({id,name:'Guardia '+id,members:[]});}s.mobileAssignments=s.mobileAssignments||{matutino:[],vespertino:[]};pruneMobiles(s,keys);if(!selectedGroup(s))s.dutySelection={guardGroupId:s.guardGroups[0].id};return s.guardGroups;}
+function setGuardGroupCount(s,count,options){if(!Number.isInteger(count)||count<3||count>6)throw Error('Elige entre 3 y 6 guardias.');const removed=(s.guardGroups||[]).slice(count);if(removed.some(g=>g.members.length)&&!(options&&options.confirmRemoval))throw Error('Las guardias que vas a quitar tienen integrantes. Confirma la reducción antes de continuar.');const keys=new Set(removed.reduce((out,g)=>out.concat(g.members.map(personKey)),[]));s.guardGroups=s.guardGroups.slice(0,count);while(s.guardGroups.length<count){const id=IDS[s.guardGroups.length];s.guardGroups.push({id,name:'Guardia '+id,members:[]});}s.mobileAssignments=s.mobileAssignments||{matutino:[],vespertino:[]};pruneMobiles(s,keys);if(!selectedGroup(s))s.dutySelection={...(s.dutySelection||{}),guardGroupId:s.guardGroups[0].id};return s.guardGroups;}
 function setGuardGroupMembers(s,id,members){const clean=validateGuardMembers(members),g=(s.guardGroups||[]).find(x=>x.id===id);if(!g)throw Error('No existe esa guardia.');const others=new Set(s.guardGroups.filter(x=>x.id!==id).reduce((out,x)=>out.concat(x.members.map(personKey)),[]));if(clean.some(p=>others.has(personKey(p))))throw Error('Ese residente ya pertenece a otra guardia.');const retained=new Set(clean.map(personKey)),removed=new Set(g.members.map(personKey).filter(k=>!retained.has(k)));g.members=clean;s.mobileAssignments=s.mobileAssignments||{matutino:[],vespertino:[]};pruneMobiles(s,removed);return g;}
 function setMobileAssignment(s,shift,pair){if(!SHIFTS.includes(shift))throw Error('Elige un turno válido.');const roster=new Set(guardRoster(s).map(personKey));if(!pair||!roster.has(pair.residentKey))throw Error('El móvil debe ser un R1 o R2 de una guardia configurada.');if(!fixedResidents(s,shift).some(p=>p.key===pair.fixedResidentKey))throw Error('Elige un R1 o R2 con rol fijo en este turno.');if(pair.residentKey===pair.fixedResidentKey)throw Error('El móvil y el fijo deben ser personas diferentes.');s.mobileAssignments=s.mobileAssignments||{matutino:[],vespertino:[]};const list=s.mobileAssignments[shift]||[];if(list.some(p=>p.residentKey===pair.fixedResidentKey||p.fixedResidentKey===pair.residentKey))throw Error('Un móvil no puede ser el fijo de otro relevo en el mismo turno.');const item={residentKey:pair.residentKey,fixedResidentKey:pair.fixedResidentKey},i=list.findIndex(p=>p.residentKey===pair.residentKey);if(i>=0)list[i]=item;else list.push(item);s.mobileAssignments[shift]=list;return item;}
 function removeMobileAssignment(s,shift,key){if(!SHIFTS.includes(shift))throw Error('Elige un turno válido.');s.mobileAssignments[shift]=(s.mobileAssignments[shift]||[]).filter(p=>p.residentKey!==key);}
@@ -160,6 +171,49 @@ function removeDoctor(state,id){
  Object.values(state.dailyOverrides||{}).forEach(overrides=>{delete overrides[id];});
  return true;
 }
+function normalizeOperatingRoom(value){
+ if(typeof value==='number')return Number.isInteger(value)&&value>=1&&value<=6?value:null;
+ if(typeof value!=='string')return null;
+ const match=/^(?:QX?\s*)?([1-6])$/i.exec(value.trim());return match?Number(match[1]):null;
+}
+function operatingRoomDoctor(state,options){
+ if(!options||!validDateRange(options.date,options.date)||!SHIFTS.includes(options.shift))throw Error('Elige una fecha y un turno válidos.');
+ const doctor=(state.doctors||[]).find(item=>item.id===options.doctorId&&item.shift===options.shift);
+ if(!doctor)throw Error('Elige un médico de este turno.');return doctor;
+}
+function setOperatingRoom(state,options){
+ const doctor=operatingRoomDoctor(state,options),number=normalizeOperatingRoom(options.room);
+ if(!number)throw Error('Elige una sala de QX 1 a QX 6.');
+ const original=((state.dailyOverrides||{})[options.date]||{})[doctor.id]||{};
+ if(original.excluded||!resolveDoctorAssignment(state,doctor.id,options.date))throw Error('El médico no está disponible para este rol. Revisa su actividad o ausencia.');
+ const changed=clone(state);changed.dailyOverrides=changed.dailyOverrides||{};
+ const overrides=changed.dailyOverrides[options.date]=changed.dailyOverrides[options.date]||{},override=overrides[doctor.id]=overrides[doctor.id]||{};
+ if(!own(override,'operatingRoomPrevious')){
+  override.operatingRoomPrevious={};['service','room'].forEach(field=>{if(own(override,field))override.operatingRoomPrevious[field]=override[field];});
+ }
+ override.service='qx';override.room='QX '+number;validateState(changed);Object.assign(state,changed);return state.dailyOverrides[options.date][doctor.id];
+}
+function clearOperatingRoom(state,options){
+ const doctor=operatingRoomDoctor(state,options),original=((state.dailyOverrides||{})[options.date]||{})[doctor.id];
+ if(!original||!own(original,'room')&&!own(original,'operatingRoomPrevious'))return false;
+ const changed=clone(state),override=changed.dailyOverrides[options.date][doctor.id];
+ if(own(override,'operatingRoomPrevious')){
+  const previous=override.operatingRoomPrevious;['service','room'].forEach(field=>{if(own(previous,field))override[field]=previous[field];else delete override[field];});delete override.operatingRoomPrevious;
+ }else delete override.room;
+ if(!Object.keys(override).length)delete changed.dailyOverrides[options.date][doctor.id];
+ if(!Object.keys(changed.dailyOverrides[options.date]).length)delete changed.dailyOverrides[options.date];
+ validateState(changed);Object.assign(state,changed);return true;
+}
+function operatingRooms(state,options){
+ const result=generate(state,options),qx=result.groups.find(group=>group.service==='qx'),day=weekdayIndex(options.date),overrides=(state.dailyOverrides||{})[options.date]||{};
+ const rooms=Array.from({length:6},(_,index)=>({number:index+1,label:'QX '+(index+1),doctors:qx?qx.doctors.filter(doctor=>normalizeOperatingRoom(doctor.room)===index+1):[]}));
+ const candidates=(state.doctors||[]).filter(doctor=>doctor.shift===options.shift).map(doctor=>{
+  const override=overrides[doctor.id]||{},coverage=resolveDoctorAssignment(state,doctor.id,options.date);if(override.excluded||!coverage)return null;
+  const service=override.service||(day>=0?doctor.schedule[day]:'manual');
+  return{id:doctor.id,sourceDoctorId:doctor.id,name:coverage.doctor.name,title:coverage.doctor.title||'Dr.',originalName:doctor.name,covering:coverage.covering,service,currentRoom:service==='qx'?normalizeOperatingRoom(override.room):null};
+ }).filter(Boolean);
+ return{rooms,unassigned:qx?qx.doctors.filter(doctor=>normalizeOperatingRoom(doctor.room)===null):[],candidates};
+}
 function generate(state,options){
  if(state&&state.schemaVersion<3)state=migrateState(state);
  if(!state||!Array.isArray(state.doctors))throw Error('No hay un equipo configurado.');
@@ -196,17 +250,25 @@ function generate(state,options){
  });
  groups.forEach(g=>{g.doctors.forEach(d=>{d.residents=cleanResidents(d.residents);d.formattedResidents=formatResidents(d.residents);if(!d.residents.length)warnings.push(d.title+' '+d.name+': sin residentes asignados en '+g.label.toLocaleLowerCase('es')+'.');});const keys=new Set(g.doctors.reduce((out,d)=>out.concat(d.residents.map(personKey)),[]));g.support=cleanResidents(g.support).filter(p=>!keys.has(personKey(p)));});
  if(floorReminder)groups.find(group=>group.service==='piso').floorReminder=true;
- const active=groups.filter(g=>g.doctors.length||g.support.length||g.floorReminder),qx=active.find(g=>g.service==='qx');if(qx)qx.doctors.sort((a,b)=>!a.room&&b.room?1:a.room&&!b.room?-1:a.room.localeCompare(b.room,'es',{numeric:true}));
+ const active=groups.filter(g=>g.doctors.length||g.support.length||g.floorReminder),qx=active.find(g=>g.service==='qx');
+ if(qx){
+  qx.doctors.sort((a,b)=>{const first=normalizeOperatingRoom(a.room),second=normalizeOperatingRoom(b.room);if(first!==null||second!==null)return first===null?1:second===null?-1:first-second;return!a.room&&b.room?1:a.room&&!b.room?-1:a.room.localeCompare(b.room,'es',{numeric:true});});
+  qx.rooms=Array.from({length:6},(_,index)=>({number:index+1,room:'QX '+(index+1),doctors:qx.doctors.filter(doctor=>normalizeOperatingRoom(doctor.room)===index+1)})).filter(room=>room.doctors.length);
+  qx.rooms.forEach(room=>{room.residents=cleanResidents(room.doctors.reduce((people,doctor)=>people.concat(doctor.residents),[]));});
+ }
  if(!active.length)warnings.push('No hay actividades para este turno y fecha.');
  const lines=['Rol '+(shift==='matutino'?'TM':'TV')];
  active.forEach(g=>{
   lines.push('',g.label);
-  g.doctors.forEach(d=>{const people=g.doctors.length===1?d.residents.concat(g.support):d.residents,residents=formatResidents(people);lines.push((d.room?d.room+' ':'')+d.title+' '+d.name+(residents?' / '+residents:''));});
+  if(g.service==='qx'){
+   (g.rooms||[]).forEach(room=>{const seenDoctors=new Set(),names=room.doctors.filter(doctor=>{const key=doctor.coverDoctorId||doctor.id;if(seenDoctors.has(key))return false;seenDoctors.add(key);return true;}).map(doctor=>doctor.title+' '+doctor.name),people=g.doctors.length===1?room.residents.concat(g.support):room.residents,residents=formatResidents(people);lines.push(room.room+' '+names.join(' / ')+(residents?' / '+residents:''));});
+   g.doctors.filter(doctor=>normalizeOperatingRoom(doctor.room)===null).forEach(d=>{const people=g.doctors.length===1?d.residents.concat(g.support):d.residents,residents=formatResidents(people);lines.push((d.room?d.room+' ':'')+d.title+' '+d.name+(residents?' / '+residents:''));});
+  }else g.doctors.forEach(d=>{const people=g.doctors.length===1?d.residents.concat(g.support):d.residents,residents=formatResidents(people);lines.push((d.room?d.room+' ':'')+d.title+' '+d.name+(residents?' / '+residents:''));});
   if(g.support.length&&g.doctors.length!==1)lines.push((g.doctors.length?'Apoyo / ':'')+formatResidents(g.support));
   if(g.service==='piso'&&floorReminder){const note='(Resto de r1 al terminar actividades)';if(lines[lines.length-1]===g.label)lines.push(note);else lines[lines.length-1]+=' '+note;}
  });
  if(includeGuards)lines.push('','Guardia'+(guard.group?' '+guard.group:''),formatResidents(guard.guards)||'Sin integrantes asignados');
- return{text:lines.join('\n'),groups:active,warnings,guards:guard.guards,guardStatus:guard.guardStatus,guardGroup:guard.group,postGuardDate:'',postGuardStatus:previous.status,postGuardGroup:previous.group,postGuardResidents:previous.residents,postGuardExcluded:excluded,mobileAssignments:mobileResults};
+ return{text:lines.join('\n'),groups:active,warnings,guards:guard.guards,guardStatus:guard.guardStatus,guardGroup:guard.group,postGuardDate:previous.date,postGuardStatus:previous.status,postGuardGroup:previous.group,postGuardResidents:previous.residents,postGuardExcluded:excluded,mobileAssignments:mobileResults};
 }
 function validateBase(s){
  const validServices=SERVICES.map(x=>x[0]).concat(['cobertura','manual']),people=list=>Array.isArray(list)&&cleanResidents(list).length===list.length&&list.every(p=>(!own(p,'startDay')||Number.isInteger(p.startDay)&&p.startDay>=1&&p.startDay<=31)&&(!own(p,'endDay')||Number.isInteger(p.endDay)&&p.endDay>=1&&p.endDay<=31)&&(!p.startDay||!p.endDay||p.startDay<=p.endDay));
@@ -215,7 +277,7 @@ function validateBase(s){
  if(s.absences&&(!Array.isArray(s.absences)||s.absences.some(a=>!a||!['doctor','resident'].includes(a.personType)||typeof a.personId!=='string'||!validDateRange(a.start,a.end)||own(a,'coverDoctorId')&&(typeof a.coverDoctorId!=='string'||a.coverDoctorId===a.personId))))throw Error('El respaldo contiene una ausencia inválida.');
  if(s.serviceRules&&(!Array.isArray(s.serviceRules)||s.serviceRules.some(r=>!object(r)||!SHIFTS.includes(r.shift)||!SERVICES.some(x=>x[0]===r.service)||!people(r.residents))))throw Error('El respaldo contiene apoyos inválidos.');
  if(s.dailyOverrides!==undefined&&!object(s.dailyOverrides))throw Error('El respaldo contiene ajustes diarios inválidos.');
- Object.entries(s.dailyOverrides||{}).forEach(([date,overrides])=>{if(!validDateRange(date,date)||!object(overrides))throw Error('El respaldo contiene una fecha inválida.');Object.entries(overrides).forEach(([id,o])=>{if(!ids.has(id)||!object(o)||own(o,'service')&&!validServices.includes(o.service)||own(o,'room')&&typeof o.room!=='string'||own(o,'excluded')&&typeof o.excluded!=='boolean'||own(o,'residents')&&!people(o.residents))throw Error('El respaldo contiene una asignación diaria inválida.');});});
+ Object.entries(s.dailyOverrides||{}).forEach(([date,overrides])=>{if(!validDateRange(date,date)||!object(overrides))throw Error('El respaldo contiene una fecha inválida.');Object.entries(overrides).forEach(([id,o])=>{if(!ids.has(id)||!object(o)||own(o,'service')&&!validServices.includes(o.service)||own(o,'room')&&typeof o.room!=='string'||own(o,'excluded')&&typeof o.excluded!=='boolean'||own(o,'residents')&&!people(o.residents))throw Error('El respaldo contiene una asignación diaria inválida.');if(own(o,'operatingRoomPrevious')){const previous=o.operatingRoomPrevious;if(!object(previous)||Object.keys(previous).some(key=>!['service','room'].includes(key))||own(previous,'service')&&!validServices.includes(previous.service)||own(previous,'room')&&typeof previous.room!=='string')throw Error('El respaldo contiene una asignación anterior de sala inválida.');}});});
  if(s.settings!==undefined&&!object(s.settings))throw Error('El respaldo contiene preferencias inválidas.');['showDoctors','includeGuards','includeServiceSupport','includeDate','excludePostGuard','floorR1Reminder'].forEach(k=>{if(own(s.settings,k)&&typeof s.settings[k]!=='boolean')throw Error('El respaldo contiene una preferencia inválida.');});
  if(s.settings&&own(s.settings,'floorNotes')&&(!object(s.settings.floorNotes)||Object.values(s.settings.floorNotes).some(n=>typeof n!=='string')))throw Error('El respaldo contiene una nota de piso inválida.');
  if(s.history&&(!Array.isArray(s.history)||s.history.some(h=>!object(h)||typeof h.text!=='string')))throw Error('El respaldo contiene un historial inválido.');
@@ -227,15 +289,18 @@ function validateState(s){
  if(!Array.isArray(s.guardGroups)||s.guardGroups.length<3||s.guardGroups.length>6)throw Error('Configura entre 3 y 6 guardias.');
  const seen=new Set();s.guardGroups.forEach((g,i)=>{if(!object(g)||g.id!==IDS[i]||typeof g.name!=='string'||!g.name.trim())throw Error('El respaldo contiene una guardia inválida.');validateGuardMembers(g.members).forEach(p=>{const k=personKey(p);if(seen.has(k))throw Error('Un residente está repetido entre guardias.');seen.add(k);});});
  if(!object(s.dutySelection)||!s.guardGroups.some(g=>g.id===s.dutySelection.guardGroupId))throw Error('Elige una guardia actual válida.');
+ if(own(s.dutySelection,'referenceDate')&&(typeof s.dutySelection.referenceDate!=='string'||!validDateRange(s.dutySelection.referenceDate,s.dutySelection.referenceDate)))throw Error('La fecha de la guardia registrada no es válida.');
  if(!object(s.mobileAssignments))throw Error('El respaldo contiene móviles inválidos.');
  SHIFTS.forEach(shift=>{const list=s.mobileAssignments[shift];if(!Array.isArray(list))throw Error('El respaldo contiene móviles inválidos.');const keys=new Set();list.forEach(p=>{if(!object(p)||typeof p.residentKey!=='string'||!seen.has(p.residentKey)||typeof p.fixedResidentKey!=='string'||!/^.+\|R[12]$/.test(p.fixedResidentKey)||p.residentKey===p.fixedResidentKey||keys.has(p.residentKey))throw Error('El respaldo contiene un relevo móvil inválido.');keys.add(p.residentKey);});if(list.some(p=>keys.has(p.fixedResidentKey)))throw Error('El respaldo contiene una cadena de móviles inválida.');});
  return s;
 }
-function migrateState(input){
+function migrateState(input,options){
+ if(options&&own(options,'referenceDate')&&(typeof options.referenceDate!=='string'||!validDateRange(options.referenceDate,options.referenceDate)))throw Error('Elige una fecha válida para la guardia registrada.');
  if(!input||![1,2,3].includes(input.schemaVersion))throw Error('El archivo no es un respaldo de Rolero compatible.');
  if(input.schemaVersion===2||input.schemaVersion===3){
   const s=clone(input);s.mobileAssignments=s.mobileAssignments||{matutino:[],vespertino:[]};s.dutySelection=s.dutySelection||{guardGroupId:'A'};
   if(input.schemaVersion===2)validateState(s);
+  if(!own(s.dutySelection,'referenceDate')&&options&&options.referenceDate)s.dutySelection.referenceDate=options.referenceDate;
   s.schemaVersion=3;s.settings={...(s.settings||{}),showDoctors:true,includeGuards:false,includeDate:false,excludePostGuard:true,floorR1Reminder:input.schemaVersion===3?!!(input.settings||{}).floorR1Reminder:false};
   return validateState(s);
  }
@@ -259,7 +324,7 @@ function migrateState(input){
  if(months.length||Object.keys(legacy.manualGuards).length)s.legacyGuardData=legacy;delete s.guards;delete s.manualGuards;
  s.dutySelection={guardGroupId:'A'};s.mobileAssignments={matutino:[],vespertino:[]};s.settings={...(s.settings||{}),postGuardMode:'previous'};
  s.sourceNotes=(s.sourceNotes||[]).filter(n=>!/calendario|mes ni año|guardias varían|Carlos R1 figura en la guardia|rangos de González/i.test(n));
- return migrateState(s);
+ return migrateState(s,options);
 }
-return{SERVICES,weekdayIndex,personKey,parseResidents,parseGuardMembers,formatResidents,isAbsent,availableResidents,guardRoster,fixedResidents,resolveGuards,postGuard,setGuardGroupCount,setGuardGroupMembers,setMobileAssignment,removeMobileAssignment,residentRoster,addResident,updateResident,removeResident,resolveDoctorAssignment,registerAbsence,removeDoctor,generate,migrateState,validateState,validDateRange};
+return{SERVICES,weekdayIndex,personKey,parseResidents,parseGuardMembers,formatResidents,isAbsent,availableResidents,guardRoster,fixedResidents,resolveGuards,postGuard,setDutyReference,setGuardGroupCount,setGuardGroupMembers,setMobileAssignment,removeMobileAssignment,residentRoster,addResident,updateResident,removeResident,resolveDoctorAssignment,registerAbsence,removeDoctor,normalizeOperatingRoom,operatingRooms,setOperatingRoom,clearOperatingRoom,generate,migrateState,validateState,validDateRange};
 });

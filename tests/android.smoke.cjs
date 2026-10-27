@@ -8,7 +8,7 @@ const adbPath = 'C:/Users/bardiostudio/AppData/Local/Android/Sdk/platform-tools/
 const serial = process.env.ROLERO_DEVICE || 'emulator-5554';
 assert.match(serial, /^emulator-\d+$/, 'Estas pruebas automáticas sólo modifican un emulador.');
 const apk = process.argv[2] || 'dist/Rolero-debug.apk';
-const out = path.resolve('qa/residents');
+const out = path.resolve('qa/rooms');
 const storageKey = 'rolero-state-v1';
 const monday = '2026-10-26';
 const floorReminder = '(Resto de r1 al terminar actividades)';
@@ -21,7 +21,7 @@ function adb(...args) {
   return execFileSync(adbPath, ['-s', serial, ...args], { encoding: 'utf8', timeout: args[0] === 'install' ? 60000 : 30000, windowsHide: true }).trim();
 }
 function report() {
-  fs.writeFileSync(path.join(out, 'android-results.json'), JSON.stringify({ version: '1.3.0', schemaVersion: 3, device: serial, apk: path.resolve(apk), platform: 'Android WebView', screenshotsEnabled, passed, errors, diagnostics, currentStep, failure, cleanupErrors, success: !failure && !errors.length && !cleanupErrors.length }, null, 2));
+  fs.writeFileSync(path.join(out, 'android-results.json'), JSON.stringify({ version: '1.4.0', schemaVersion: 3, device: serial, apk: path.resolve(apk), platform: 'Android WebView', screenshotsEnabled, passed, errors, diagnostics, currentStep, failure, cleanupErrors, success: !failure && !errors.length && !cleanupErrors.length }, null, 2));
 }
 async function connect() {
   const devices = await _android.devices({ host: '127.0.0.1', port: 5037, omitDriverInstall: true });
@@ -47,6 +47,7 @@ const residentForm = key => page.locator('form[data-form="resident"][data-key="'
 async function open(name) { const node = page.locator('details[data-detail="' + name + '"]'); if (!await node.evaluate(el => el.open)) await node.locator('summary').first().click(); }
 async function setDate(value) { await page.locator('#create-date').fill(value); await page.locator('#create-date').dispatchEvent('change'); }
 async function loadFixture(value) {
+  assert.ok(value.dutySelection.referenceDate, 'Cada fixture debe fijar su fecha de referencia.');
   await page.evaluate(({ key, value }) => localStorage.setItem(key, JSON.stringify(value)), { key: storageKey, value });
   await page.reload({ timeout: 30000 }); await page.locator('#create-date').waitFor({ timeout: 30000 }); await setDate(monday);
 }
@@ -58,19 +59,23 @@ async function recordNativeCopy() {
     window.Android = { copyText: text => { qaNativeCalls.push({ action: 'copy', text }); bridge.copyText(text); }, shareText: text => bridge.shareText(text), saveBackup: text => bridge.saveBackup(text), restoreBackup: () => bridge.restoreBackup() };
   });
 }
-async function richFixture() {
-  const s = await page.evaluate(() => JSON.parse(JSON.stringify(ROLERO_DEFAULTS))), person = { name: 'Ciclo nativo', grade: 1 };
-  for (const id of ['montoya', 'leyva']) s.doctors.find(d => d.id === id).residents.push({ ...person });
-  s.serviceRules[0].residents.push({ ...person, startDay: 1, endDay: 31 });
-  s.dailyOverrides = { [monday]: { montoya: { service: 'consulta', room: 'Q5', residents: [{ ...person }, { name: 'Mayor intacto', grade: 4 }] } } };
-  s.guardGroups[0].members = [{ ...person }]; s.guardGroups[1].members = [{ name: 'Otro móvil', grade: 2 }];
-  s.absences = [{ id: 'ausencia-ciclo', personType: 'resident', personId: 'ciclo nativo|R1', start: '2026-11-01', end: '2026-11-02', note: 'Conservar rango' }];
-  s.mobileAssignments = { matutino: [{ residentKey: 'ciclo nativo|R1', fixedResidentKey: 'ibarra|R2' }], vespertino: [{ residentKey: 'otro movil|R2', fixedResidentKey: 'ciclo nativo|R1' }] };
-  s.history = [{ id: 'historico', date: monday, shift: 'matutino', text: 'Ciclo nativo R1 / Texto histórico' }];
-  s.legacyGuardData = { guards: { anotacion: 'Ciclo nativo R1' }, manualGuards: {} };
+async function defaults() { const s = await page.evaluate(() => JSON.parse(JSON.stringify(ROLERO_DEFAULTS))); s.dutySelection = { guardGroupId: 'A', referenceDate: monday }; return s; }
+async function cycleFixture() {
+  const s = await defaults(), people = [{ name: 'Alfa QA', grade: 1 }, { name: 'Beta QA', grade: 2 }, { name: 'Gamma QA', grade: 1 }, { name: 'Delta QA', grade: 2 }];
+  s.guardGroups.forEach((group, index) => { group.members = [{ ...people[index] }]; }); s.serviceRules = [];
+  for (const id of ['montoya', 'leyva']) s.doctors.find(d => d.id === id).residents = [{ name: 'Mayor QA', grade: 4 }, ...people.map(p => ({ ...p }))];
   return s;
 }
-function allPeople(s) { return s.doctors.flatMap(d => d.residents).concat(s.serviceRules.flatMap(r => r.residents), s.guardGroups.flatMap(g => g.members), Object.values(s.dailyOverrides).flatMap(day => Object.values(day).flatMap(o => o.residents || []))); }
+async function mobileFixture() {
+  const s = await defaults(); s.guardGroups[0].members = [{ name: 'Ibarra', grade: 2 }]; s.guardGroups[1].members = [{ name: 'Beta QA', grade: 1 }]; s.guardGroups[2].members = [{ name: 'Móvil QA', grade: 2 }]; s.guardGroups[3].members = [{ name: 'Delta QA', grade: 1 }];
+  for (const id of ['montoya', 'leyva']) s.doctors.find(d => d.id === id).residents = [{ name: 'Ibarra', grade: 2 }];
+  s.mobileAssignments = { matutino: [{ residentKey: 'movil qa|R2', fixedResidentKey: 'ibarra|R2' }], vespertino: [{ residentKey: 'movil qa|R2', fixedResidentKey: 'ibarra|R2' }] };
+  s.absences = [{ id: 'ausencia-fijo', personType: 'resident', personId: 'ibarra|R2', start: '2026-10-29', end: '2026-10-29', note: 'Móvil de postguardia' }]; return s;
+}
+async function shift(value) { await page.locator('[data-action="shift"][data-shift="' + value + '"]').click(); }
+async function assign(room, doctorId) { await open('qx-rooms'); await open('qx-room-' + room); const form = page.locator('form[data-form="qx-room"][data-room="' + room + '"]'); await form.locator('[name="doctorId"]').selectOption(doctorId); await form.locator('[type="submit"]').click(); }
+async function clear(room, doctorId) { await open('qx-rooms'); await open('qx-room-' + room); await page.locator('details[data-detail="qx-room-' + room + '"] [data-action="clear-qx-room"][data-id="' + doctorId + '"]').click(); }
+function roomLines(text) { return text.split('\n').filter(line => /^QX [1-6]\b/.test(line)); }
 async function restoreOriginal() {
   if (!originalEntries) return;
   const restore = async () => {
@@ -90,62 +95,53 @@ async function restoreOriginal() {
     originalEntries = await page.evaluate(() => Object.fromEntries(Object.entries(localStorage)));
     fs.writeFileSync(path.join(out, 'android-original-state.json'), JSON.stringify({ storageKey, original: originalEntries[storageKey] ?? null, entries: originalEntries }, null, 2));
 
-    await check('Actualización conserva datos y restringe la edición de residentes a Guardias', async () => {
-      const loaded = await state(); assert.equal(loaded.schemaVersion, 3);
+    await check('La actualización conserva datos y la referencia cambia sólo desde Guardias', async () => {
+      const loaded = await state(); assert.equal(loaded.schemaVersion, 3); assert.match(loaded.dutySelection.referenceDate, /^\d{4}-\d{2}-\d{2}$/);
       const prior = originalEntries[storageKey] ? JSON.parse(originalEntries[storageKey]) : null;
       if (prior) for (const key of ['doctors', 'serviceRules', 'absences', 'dailyOverrides', 'history', 'guardGroups', 'dutySelection', 'mobileAssignments']) if (prior[key] !== undefined && (prior.schemaVersion >= 2 || !['guardGroups', 'dutySelection', 'mobileAssignments'].includes(key))) assert.deepEqual(loaded[key], prior[key], 'La actualización alteró ' + key);
-      const defaults = await page.evaluate(() => JSON.parse(JSON.stringify(ROLERO_DEFAULTS))); await loadFixture(defaults);
-      await open('organize-turn'); await open('day-montoya'); assert.equal(await page.locator('textarea[data-day-field="residents"], [name="residents"], [data-form="resident"]').count(), 0);
-      await tab('equipo'); assert.equal(await page.locator('#team-preview-text, [data-detail="team-report"], .preview-card, [data-action="copy"], [data-action="share"]').count(), 0);
-      await open('team-matutino'); await page.locator('[data-action="add-doctor"][data-shift="matutino"]').click(); assert.equal(await page.locator('#add-doctor [name="residents"]').count(), 0); await page.locator('[data-action="close-modal"]').click();
-      await tab('guardias'); assert.equal(await page.evaluate(() => Rolero.residentRoster(RoleroUI.getState()).length), 14); assert.equal(await page.locator('textarea').count(), 0);
+      await loadFixture(await cycleFixture()); await tab('guardias'); await page.locator('#duty-reference-date').fill(monday); await page.locator('#duty-reference-date').dispatchEvent('change'); await page.locator('[data-duty-field="guardGroupId"]').selectOption('A'); const reference = (await state()).dutySelection;
+      await tab('crear'); await setDate('2026-10-27'); assert.deepEqual(await page.locator('.duty-summary strong').allInnerTexts(), ['Guardia B', 'Guardia A']);
+      for (const selectedShift of ['matutino', 'vespertino']) { await shift(selectedShift); assert.doesNotMatch(await preview(), /Alfa QA/); assert.match(await preview(), /Delta QA/); }
+      await setDate(monday); assert.deepEqual(await page.locator('.duty-summary strong').allInnerTexts(), ['Guardia A', 'Guardia D']); assert.deepEqual((await state()).dutySelection, reference);
+      assert.doesNotMatch(await page.locator('.preview-card').innerText(), /postguardia/i); assert.doesNotMatch(await preview(), /postguardia/i); assert.equal(await page.locator('[data-day-field="room"], [data-day-field="residents"]').count(), 0);
+      await tab('equipo'); assert.equal(await page.locator('#team-preview-text, [data-detail="team-report"], [data-action="copy"], [data-action="share"]').count(), 0);
     });
 
-    await check('Alta R1 con médicos de ambos turnos, nombre de guardia y copia desde Crear', async () => {
-      await open('guard-A'); const nameForm = page.locator('form[data-form="guard-name"][data-id="A"]'); await nameForm.locator('[name="name"]').fill('Guardia nativa'); await nameForm.locator('[type="submit"]').click();
-      assert.equal(await page.locator('[data-duty-field="guardGroupId"] option[value="A"]').innerText(), 'Guardia nativa');
-      await open('add-resident-A'); const form = page.locator('form[data-form="add-resident"][data-group="A"]'); await form.locator('[name="name"]').fill('Alta nativa'); await form.locator('[name="grade"]').selectOption('1');
-      await open('assignment-new-A');
-      for (const [selectedShift, id] of [['matutino', 'montoya'], ['vespertino', 'leyva']]) { await open('assignment-new-A-' + selectedShift); await form.locator('[name="doctor-' + selectedShift + '"][value="' + id + '"]').check(); }
-      await form.locator('[type="submit"]').click();
-      const s = await state(); assert.ok(s.doctors.find(d => d.id === 'montoya').residents.some(p => p.name === 'Alta nativa' && p.grade === 1)); assert.ok(s.doctors.find(d => d.id === 'leyva').residents.some(p => p.name === 'Alta nativa' && p.grade === 1));
-      await tab('crear'); await recordNativeCopy(); assert.match(await preview(), /Dr\. Montoya[^\n]*Alta nativa R1/);
-      assert.equal(await page.locator('.preview-card [data-action="copy"]').isEnabled(), true); await page.locator('.preview-card [data-action="copy"]').click(); assert.equal(await page.evaluate(() => qaNativeCalls.at(-1).text), await preview());
-      await page.locator('[data-action="shift"][data-shift="vespertino"]').click(); assert.match(await preview(), /Dr\. Leyva[^\n]*Alta nativa R1/);
-      await page.reload({ timeout: 30000 }); await page.locator('#create-date').waitFor(); await tab('guardias'); assert.equal((await state()).guardGroups[0].name, 'Guardia nativa'); await screenshot('alta');
+    await check('La fecha del rol calcula la postguardia y las sustituciones en ambos turnos', async () => {
+      await loadFixture(await mobileFixture()); await recordNativeCopy();
+      for (const [date, expected] of [[monday, 'reserve'], ['2026-10-27', 'cover'], ['2026-10-29', 'unavailable'], [monday, 'reserve']]) {
+        await setDate(date);
+        for (const selectedShift of ['matutino', 'vespertino']) { await shift(selectedShift); const text = await preview(); if (expected === 'reserve') { assert.match(text, /Ibarra R2/); assert.doesNotMatch(text, /Móvil QA/); } else if (expected === 'cover') { assert.doesNotMatch(text, /Ibarra R2/); assert.match(text, /Móvil QA R2 \(móvil\)/); await page.locator('.preview-card [data-action="copy"]').click(); assert.equal(await page.evaluate(() => qaNativeCalls.at(-1).text), text); } else assert.doesNotMatch(text, /Ibarra R2|Móvil QA/); }
+      }
+      assert.deepEqual((await state()).dutySelection, { guardGroupId: 'A', referenceDate: monday });
     });
 
-    await check('Ascender R1 a R2 conserva médicos, rangos, ausencias y referencias móviles', async () => {
-      const original = await richFixture(); await loadFixture(original); await tab('guardias'); await open('guard-A'); await open('resident-' + encodeURIComponent('ciclo nativo|R1'));
-      await residentForm('ciclo nativo|R1').locator('[data-action="promote-resident"]').click(); const s = await state();
-      assert.ok(allPeople(s).some(p => p.name === 'Ciclo nativo')); assert.ok(allPeople(s).filter(p => p.name === 'Ciclo nativo').every(p => p.grade === 2));
-      assert.equal(s.absences[0].personId, 'ciclo nativo|R2'); assert.equal(s.mobileAssignments.matutino[0].residentKey, 'ciclo nativo|R2'); assert.equal(s.mobileAssignments.vespertino[0].fixedResidentKey, 'ciclo nativo|R2');
-      assert.deepEqual(s.serviceRules[0].residents.find(p => p.name === 'Ciclo nativo'), { name: 'Ciclo nativo', grade: 2, startDay: 1, endDay: 31 }); assert.equal(s.dailyOverrides[monday].montoya.room, 'Q5');
-      assert.deepEqual(s.history, original.history); assert.deepEqual(s.legacyGuardData, original.legacyGuardData);
-      const form = residentForm('ciclo nativo|R2'); assert.equal(await form.locator('[name="doctor-matutino"][value="montoya"]').isChecked(), true); assert.equal(await form.locator('[name="doctor-vespertino"][value="leyva"]').isChecked(), true);
-      await form.locator('[type="submit"]').click(); assert.deepEqual((await state()).doctors, s.doctors);
+    await check('QX ordena seis salas y reúne dos médicos y residentes sin duplicados', async () => {
+      const initial = await defaults(); initial.doctors.find(d => d.id === 'quiroz').residents.push({ name: 'Andrade', grade: 2 }); await loadFixture(initial); await recordNativeCopy();
+      assert.equal(await page.locator('details[data-detail="qx-rooms"]').evaluate(el => el.open), false);
+      for (const [room, doctorId] of [[6, 'montoya'], [5, 'torres'], [4, 'cerda'], [3, 'pardini'], [2, 'flores'], [1, 'ramirez'], [1, 'quiroz']]) await assign(room, doctorId);
+      const text = await preview(), lines = roomLines(text); assert.deepEqual(lines.map(line => Number(/^QX (\d)/.exec(line)[1])), [1, 2, 3, 4, 5, 6]);
+      for (const name of ['Dr. Ramírez', 'Dr. Quiroz']) { assert.equal(lines[0].split(name).length - 1, 1); assert.ok(lines[0].indexOf(name) < lines[0].indexOf('Rotantes')); }
+      assert.equal((lines[0].match(/Andrade R2/g) || []).length, 1); assert.equal((lines[0].match(/Rotantes/g) || []).length, 1);
+      assert.equal(await page.locator('details[data-detail="qx-room-1"] .qx-room-doctor').count(), 2); await page.locator('.preview-card [data-action="copy"]').click(); assert.equal(await page.evaluate(() => qaNativeCalls.at(-1).text), text); await screenshot('salas');
     });
 
-    await check('Ascender R2 a R3 requiere confirmar y elimina sólo las referencias activas', async () => {
-      const original = await state(); const form = residentForm('ciclo nativo|R2'); await form.locator('[data-action="promote-resident"]').click();
-      assert.equal(await page.locator('#modal').isVisible(), true); await page.getByRole('button', { name: 'Cancelar', exact: true }).click(); assert.deepEqual(await state(), original);
-      await form.locator('[data-action="promote-resident"]').click(); await page.locator('[data-action="confirm-retire-resident"][data-key="ciclo nativo|R2"]').click(); const s = await state();
-      assert.ok(!allPeople(s).some(p => p.name === 'Ciclo nativo')); assert.ok(!s.absences.some(a => a.personId === 'ciclo nativo|R2')); assert.deepEqual(s.mobileAssignments, { matutino: [], vespertino: [] });
-      assert.deepEqual(s.history, original.history); assert.deepEqual(s.legacyGuardData, original.legacyGuardData); assert.ok(allPeople(s).some(p => p.name === 'Mayor intacto' && p.grade === 4));
-      await open('guard-B'); await open('resident-' + encodeURIComponent('otro movil|R2')); await residentForm('otro movil|R2').locator('[data-action="remove-resident"]').click(); await page.locator('[data-action="confirm-retire-resident"][data-key="otro movil|R2"]').click();
-      assert.ok(!allPeople(await state()).some(p => p.name === 'Otro móvil')); await tab('crear'); assert.doesNotMatch(await preview(), /Ciclo nativo/);
+    await check('Mover y restablecer sala conserva el ajuste previo y separa fechas y turnos', async () => {
+      const initial = await defaults(), old = { service: 'urgencias', room: 'Sala previa', excluded: false, residents: [{ name: 'Previo QA', grade: 2 }] }; initial.dailyOverrides = { [monday]: { montoya: old } }; await loadFixture(initial);
+      await assign(6, 'montoya'); await assign(2, 'montoya'); assert.deepEqual((await state()).dailyOverrides[monday].montoya.operatingRoomPrevious, { service: 'urgencias', room: 'Sala previa' }); assert.equal((await preview()).split('\n').filter(line => /Dr\. Montoya/.test(line)).length, 1);
+      await clear(2, 'montoya'); assert.deepEqual((await state()).dailyOverrides[monday].montoya, old); await assign(6, 'montoya');
+      await shift('vespertino'); await assign(2, 'leyva'); assert.equal(await page.locator('form[data-room="1"] option[value="montoya"]').count(), 0); assert.match(await preview(), /QX 2 Dr\. Leyva/);
+      await shift('matutino'); await setDate('2026-10-27'); assert.doesNotMatch(await preview(), /QX 6 Dr\. Montoya/); await assign(5, 'montoya'); await setDate(monday); assert.match(await preview(), /QX 6 Dr\. Montoya/);
+      const s = await state(); assert.equal(s.dailyOverrides[monday].leyva.room, 'QX 2'); assert.equal(s.dailyOverrides['2026-10-27'].montoya.room, 'QX 5');
     });
 
-    await check('Guardias, retiros y preferencias persisten con cierre normal y reapertura', async () => {
-      await page.locator('#floor-r1-switch').check(); assert.ok((await preview()).includes(floorReminder)); await tab('guardias'); await open('guard-A');
-      const form = page.locator('form[data-form="guard-name"][data-id="A"]'); await form.locator('[name="name"]').fill('Guardia persistente'); await form.locator('[type="submit"]').click(); const before = await state();
-      await page.waitForFunction(({ key, expected }) => JSON.stringify(JSON.parse(localStorage.getItem(key))) === JSON.stringify(expected), { key: storageKey, expected: before });
-      assert.deepEqual(await page.evaluate(key => JSON.parse(localStorage.getItem(key)), storageKey), before);
-      await disconnect(); adb('shell', 'input', 'keyevent', 'KEYCODE_HOME'); await new Promise(resolve => setTimeout(resolve, 2000));
-      adb('shell', 'am', 'force-stop', 'mx.rolero.app'); adb('shell', 'am', 'start', '-n', 'mx.rolero.app/.MainActivity'); await connect(); const after = await state(); assert.deepEqual(after, before);
-      await setDate(monday); assert.equal(await page.locator('#floor-r1-switch').isChecked(), true); assert.ok((await preview()).includes(floorReminder)); await tab('guardias'); assert.equal(await page.locator('[data-duty-field="guardGroupId"] option[value="A"]').innerText(), 'Guardia persistente');
+    await check('Referencia, salas y ajustes persisten con cierre normal y reapertura', async () => {
+      await page.locator('#floor-r1-switch').check(); assert.ok((await preview()).includes(floorReminder)); await tab('guardias'); await page.locator('#duty-reference-date').fill('2026-10-30'); await page.locator('#duty-reference-date').dispatchEvent('change'); await page.locator('[data-duty-field="guardGroupId"]').selectOption('C'); const before = await state();
+      await page.waitForFunction(({ key, expected }) => JSON.stringify(JSON.parse(localStorage.getItem(key))) === JSON.stringify(expected), { key: storageKey, expected: before }); assert.deepEqual(await page.evaluate(key => JSON.parse(localStorage.getItem(key)), storageKey), before);
+      await disconnect(); adb('shell', 'input', 'keyevent', 'KEYCODE_HOME'); await new Promise(resolve => setTimeout(resolve, 2000)); adb('shell', 'am', 'force-stop', 'mx.rolero.app'); adb('shell', 'am', 'start', '-n', 'mx.rolero.app/.MainActivity'); await connect(); assert.deepEqual(await state(), before);
+      await setDate(monday); assert.match(await preview(), /QX 6 Dr\. Montoya/); await shift('vespertino'); assert.match(await preview(), /QX 2 Dr\. Leyva/); await tab('guardias'); assert.equal(await page.locator('#duty-reference-date').inputValue(), '2026-10-30'); assert.equal(await page.locator('[data-duty-field="guardGroupId"]').inputValue(), 'C');
     });
-    assert.deepEqual(errors, []); console.log('Android residents checks passed:', passed.length);
+    assert.deepEqual(errors, []); console.log('Android rooms checks passed:', passed.length);
   } catch (error) { failure = { step: currentStep, message: error.message, stack: error.stack }; console.error(error); process.exitCode = 1; if (page && !page.isClosed()) await screenshot('failure'); }
   finally {
     try { await restoreOriginal(); } catch (error) { cleanupErrors.push('Restauración del estado previo: ' + error.message); process.exitCode = 1; }
@@ -153,3 +149,4 @@ async function restoreOriginal() {
     report(); cleanupErrors.forEach(error => console.error(error));
   }
 })().catch(error => { console.error(error); process.exitCode = 1; });
+
