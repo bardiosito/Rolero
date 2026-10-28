@@ -65,7 +65,9 @@ test('dos médicos en la misma sala se publican en líneas propias con sus resid
   assert.deepEqual(room.doctors.map(doctor => doctor.id), ['md-a', 'md-b']);
   assert.equal(room.residents.filter(resident => R.personKey(resident) === R.personKey(person('Compartido'))).length, 1);
   const lines = result.text.split('\n').filter(line => line.startsWith('QX 1 '));
-  assert.deepEqual(lines, ['QX 1 Dr. Alfa / Rotantes / Compartido R2 / Ana R1', 'QX 1 Dra. Beta / Rotantes / Compartido R2 / Berta R1']);
+  assert.deepEqual(lines, ['QX 1 Dr. Alfa / Rotantes / Compartido R2 / Ana R1', 'QX 1 Dra. Beta / Rotantes / Compartido R2']);
+  assert.equal(room.residents.filter(resident => resident.grade === 1).length, 1);
+  assert.match(result.text, /Dr\. Gamma \/ Carlos R2 \/ Berta R1/);
 });
 
 test('las salas ocupadas se ordenan de QX 1 a QX 6 sin importar el orden de asignación', () => {
@@ -98,8 +100,8 @@ test('la unión de residentes de la sala respeta ausencias y postguardia', () =>
   setRoom(state, 'md-b', 1);
   const result = at(state);
   const room = qx(result).rooms.find(room => room.number === 1);
-  assert.ok(room.residents.every(resident => resident.grade >= 3));
-  assert.deepEqual(result.text.split('\n').filter(line => line.startsWith('QX 1 ')), ['QX 1 Dr. Alfa / Rotantes', 'QX 1 Dra. Beta / Rotantes']);
+  assert.deepEqual(room.residents.filter(resident => resident.grade === 1).map(resident => resident.name), ['Diana']);
+  assert.deepEqual(result.text.split('\n').filter(line => line.startsWith('QX 1 ')), ['QX 1 Dr. Alfa / Rotantes / Diana R1', 'QX 1 Dra. Beta / Rotantes']);
   assert.doesNotMatch(result.text, /Compartido R2|Ana R1|Berta R1/);
 });
 
@@ -130,7 +132,8 @@ test('el suplente que ocupa dos plazas conserva cada equipo en su propia línea'
   const lines = result.text.split('\n').filter(line => line.startsWith('QX 1 '));
   assert.equal(lines.length, 2);
   assert.match(lines[0], /Dra\. Beta.*Ana R1/); assert.doesNotMatch(lines[0], /Berta R1/);
-  assert.match(lines[1], /Dra\. Beta.*Berta R1/); assert.doesNotMatch(lines[1], /Ana R1/);
+  assert.match(lines[1], /Dra\. Beta.*Compartido R2/); assert.doesNotMatch(lines[1], /Ana R1|Berta R1/);
+  assert.match(result.text, /Dr\. Gamma \/ Carlos R2 \/ Berta R1/);
 });
 
 test('las asignaciones inválidas no alteran el día, los equipos ni las salas previas', () => {
@@ -164,7 +167,7 @@ test('quitar una sala restaura la actividad implícita sin perder el ajuste de r
   assert.ok(!Object.hasOwn(override, 'room'));
   assert.deepEqual(override.residents, [person('Equipo del Día', 1)]);
   assert.equal(override.excluded, false);
-  assert.match(at(state).text, /Piso\n[^\n]*Equipo del Día R1/);
+  assert.match(at(state).text, /Dra\. Beta \/ Compartido R2 \/ Equipo del Día R1/);
 });
 
 test('reasignar varias veces y limpiar restaura sala y actividad originales conservando cambios ajenos', () => {

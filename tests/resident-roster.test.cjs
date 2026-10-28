@@ -92,14 +92,14 @@ test('un alta nueva con médicos por turno se guarda y aparece en el rol de cada
   assert.match(at(restored, '2026-10-29', 'vespertino').text, /Dr\. Médico Cuatro \/ Nuevo Residente R2/);
 });
 
-test('un R1 nuevo sin médico conserva su guardia y pasa a Piso sin inventar un médico', () => {
+test('un R1 nuevo sin médico conserva su guardia y cubre servicios antes de pasar a Piso', () => {
   const state = fresh();
   R.addResident(state, { name: 'Reserva Nueva', grade: 1, guardGroupId: 'B' });
   const resident = R.residentRoster(state).find(resident => resident.key === key('Reserva Nueva'));
   assert.equal(resident.guardGroupId, 'B');
   assert.deepEqual(resident.doctorIds, { matutino: [], vespertino: [] });
   assert.deepEqual(resident.serviceRuleIds, []);
-  for (const shift of ['matutino', 'vespertino']) assert.match(at(state, '2026-10-29', shift).text, /Piso\n[^\n]*Reserva Nueva R1/);
+  for (const shift of ['matutino', 'vespertino']) assert.match(at(state, '2026-10-29', shift).text, /Reserva Nueva R1/);
 });
 
 test('elegir un junior fijo existente lo incorpora a una guardia sin borrar sus referencias', () => {

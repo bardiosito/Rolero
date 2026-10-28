@@ -214,7 +214,7 @@
 
   function renderR1Priorities() {
     var roster = engine.r1PriorityRoster(state);
-    return '<details class="section-accordion r1-priorities" data-detail="r1-priorities"><summary>Rol de R1</summary><div class="accordion-content"><p class="priority-note">Elige un destino por turno. Si no está disponible, el residente pasa a Piso. Se respetan las ausencias, la postguardia y las sustituciones.</p><div class="priority-roster">' + (roster.length ? roster.map(function (resident) {
+    return '<details class="section-accordion r1-priorities" data-detail="r1-priorities"><summary>Rol de R1</summary><div class="accordion-content"><p class="priority-note">Elige el destino preferente por turno. Se cubre un R1 en Urgencias y Consulta, y uno por sala QX activa. Los restantes pasan a Piso. Se respetan las ausencias, la postguardia y las sustituciones.</p><div class="priority-roster">' + (roster.length ? roster.map(function (resident) {
       var encoded = h(encodeURIComponent(resident.key));
       return '<details class="r1-priority-person" data-detail="r1-priority-' + encoded + '"><summary><span class="resident-grade">R1</span><strong>' + h(resident.name) + '</strong></summary><div class="priority-shifts">' + ['matutino', 'vespertino'].map(function (shift) {
         var configured = resident.configured[shift];

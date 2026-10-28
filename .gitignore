@@ -18,5 +18,6 @@ qa/rooms/android-original-state.json
 qa/priorities/android-original-state.json
 qa/redistribution/android-original-state.json
 qa/assignments/android-original-state.json
+qa/r1-coverage/android-original-state.json
 qa/*-stdout.log
 qa/*-stderr.log

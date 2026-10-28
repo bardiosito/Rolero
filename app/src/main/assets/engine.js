@@ -343,6 +343,35 @@ function redistributeResidents(state,date,shift,groups,omitted,postKeys,mobileKe
   residentRoster(state).filter(person=>person.grade===2&&(person.guardGroupId||fixed.has(person.key))).forEach(person=>{if(!postKeys.has(person.key)&&!mobileKeys.has(person.key)&&!isAbsent(state,'resident',person.key,date))place({name:person.name,grade:2});});
  }
 }
+function balanceR1Coverage(state,date,shift,groups){
+ const services=['qx','consulta','urgencias','piso'],people=new Map(),overrides=(state.dailyOverrides||{})[date]||{},roster=new Map(r1PriorityRoster(state).map(person=>[person.key,person]));
+ const collect=(list,position)=>list.filter(person=>{if(person.grade!==1)return true;const key=personKey(person);if(!people.has(key))people.set(key,{key,person:{...person},positions:[]});people.get(key).positions.push(position);return false;});
+ groups.filter(group=>services.includes(group.service)).forEach(group=>{group.doctors.forEach(doctor=>{doctor.residents=collect(doctor.residents,{service:group.service,doctor,room:normalizeOperatingRoom(doctor.room)});});group.support=collect(group.support,{service:group.service,doctor:null,room:null});});
+ const targetsFor=(person,turn)=>{const entry=roster.get(person.key);return entry&&entry.configured[turn]?entry.priorities[turn]:derivedR1Targets(state,person.key,turn,date);};
+ const targetService=target=>{if(target.startsWith('service:'))return target.slice(8);const doctor=state.doctors.find(item=>item.id===target.slice(7));if(!doctor)return'';const day=weekdayIndex(date),override=overrides[doctor.id]||{};return override.service||(day>=0?doctor.schedule[day]:'manual');};
+ const units=[],urg=groups.find(group=>group.service==='urgencias'),qx=groups.find(group=>group.service==='qx'),consulta=groups.find(group=>group.service==='consulta');
+ if(urg.doctors.length)units.push({service:'urgencias',doctors:urg.doctors});
+ Array.from({length:6},(_,index)=>index+1).forEach(room=>{const doctors=qx.doctors.filter(doctor=>normalizeOperatingRoom(doctor.room)===room).sort(compareOperatingDoctors);if(doctors.length)units.push({service:'qx',room,doctors});});
+ if(consulta.doctors.length)units.push({service:'consulta',doctors:consulta.doctors});
+ const score=(person,unit)=>{
+  const targets=targetsFor(person,shift),explicit=(roster.get(person.key)||{configured:{}}).configured[shift],doctorMatch=targets.some(target=>target.startsWith('doctor:')&&unit.doctors.some(doctor=>doctor.id===target.slice(7)));
+  if(person.person.mobile&&person.positions.some(position=>position.doctor&&unit.doctors.includes(position.doctor)))return 0;
+  if(explicit&&doctorMatch)return 0;
+  if(unit.service==='qx'&&r1RoomFor(state,person.key,shift,date)===unit.room&&targets.some(target=>targetService(target)==='qx'))return 1;
+  if(doctorMatch)return 2;
+  if(targets.some(target=>targetService(target)===unit.service))return 3;
+  if(unit.service==='qx'&&targetsFor(person,shift==='matutino'?'vespertino':'matutino').some(target=>targetService(target)==='qx'))return 4;
+  return 5;
+ };
+ for(let priority=0;priority<=5;priority++)units.filter(unit=>!unit.assigned).forEach(unit=>{
+  const person=Array.from(people.values()).find(person=>score(person,unit)<=priority);if(!person)return;
+  const targets=targetsFor(person,shift),preferred=targets.find(target=>target.startsWith('doctor:')&&unit.doctors.some(doctor=>doctor.id===target.slice(7))),previous=person.positions.find(position=>position.doctor&&unit.doctors.includes(position.doctor));
+  const doctor=person.person.mobile&&previous?previous.doctor:preferred?unit.doctors.find(doctor=>doctor.id===preferred.slice(7)):previous?previous.doctor:unit.doctors.find(doctor=>doctor.residents.some(resident=>resident.grade===2))||unit.doctors[0];
+  doctor.residents.push(person.person);unit.assigned=true;people.delete(person.key);
+ });
+ const floor=groups.find(group=>group.service==='piso');
+ people.forEach(person=>{const targets=targetsFor(person,shift),doctor=floor.doctors.find(doctor=>targets.includes('doctor:'+doctor.id));if(doctor)doctor.residents.push(person.person);else floor.support.push(person.person);});
+}
 function generate(state,options){
  if(state&&state.schemaVersion<3)state=migrateState(state);
  if(!state||!Array.isArray(state.doctors))throw Error('No hay un equipo configurado.');
@@ -387,6 +416,7 @@ function generate(state,options){
  });
  allocateR1Residents(state,date,shift,groups,postKeys,mobileKeys);
  redistributeResidents(state,date,shift,groups,omitted,postKeys,mobileKeys);
+ balanceR1Coverage(state,date,shift,groups);
  mobileResults.filter(result=>result.status==='assigned').forEach(result=>{for(const group of groups){const doctor=group.doctors.find(item=>item.residents.some(person=>personKey(person)===result.residentKey));if(doctor){result.targetLabel=doctor.title+' '+doctor.name;break;}if(group.support.some(person=>personKey(person)===result.residentKey)){result.targetLabel=group.label;break;}}});
  groups.forEach(g=>{g.doctors.forEach(d=>{d.residents=cleanResidents(d.residents);d.formattedResidents=formatResidents(d.residents);if(!d.residents.length)warnings.push(d.title+' '+d.name+': sin residentes asignados en '+g.label.toLocaleLowerCase('es')+'.');});const keys=new Set(g.doctors.reduce((out,d)=>out.concat(d.residents.map(personKey)),[]));g.support=cleanResidents(g.support).filter(p=>!keys.has(personKey(p)));});
  if(floorReminder)groups.find(group=>group.service==='piso').floorReminder=true;

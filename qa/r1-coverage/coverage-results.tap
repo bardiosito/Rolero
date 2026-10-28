@@ -1,0 +1,44 @@
+✔ un R1 en Urgencias y uno en Consulta antes de dejar sobrantes en Piso (23.5376ms)
+✔ habilitar QX toma primero al R1 configurado para QX y conserva un R1 en cada servicio (7.2168ms)
+✔ QX configurado en el otro turno tiene prioridad sobre Piso al abrir una sala (3.5829ms)
+✔ una sala con varios médicos recibe un solo R1 y dos salas reciben uno cada una (7.4606ms)
+✔ Consulta recibe un R1 por servicio aunque tenga varios médicos (1.5257ms)
+✔ al cerrar la sala el R1 cubre servicios vacíos y después queda en Piso (3.9903ms)
+✔ ausentes, postguardia y móviles en reserva no se usan para cubrir servicios (3.0423ms)
+✔ un móvil R1 activo conserva su médico y el destino del relevo (2.774ms)
+✔ la sala compartida conserva su R1 al mover un médico, sin duplicar al residente (7.1935ms)
+✖ respaldo y otro turno mantienen roles; fin de semana sin actividad no inventa servicios (4.7169ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 192.6734
+
+✖ failing tests:
+
+test at tests\r1-coverage.test.cjs:15:1
+✖ respaldo y otro turno mantienen roles; fin de semana sin actividad no inventa servicios (4.7169ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'Rol TM\n\nPiso\nTres R1'
+  - 'Rol TM'
+           ^
+  
+      at TestContext.<anonymous> (C:\Users\bardiostudio\Documents\rolero\tests\r1-coverage.test.cjs:15:288)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'Rol TM\n\nPiso\nTres R1',
+    expected: 'Rol TM',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
