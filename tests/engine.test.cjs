@@ -95,7 +95,7 @@ test('la guardia resuelta corresponde al grupo elegido y no se publica dentro de
   assert.equal(result.guardStatus,'group');
   assert.deepEqual(result.guards.map(R.personKey).sort(),R.parseGuardMembers('Nuevo R1, Otro R2').map(R.personKey).sort());
   assert.doesNotMatch(result.text,/Guardia/);
-  assert.match(result.text,/Piso\n[^\n]*Otro R2/);
+  assert.ok(result.groups.find(group => group.service === 'qx').support.some(person => person.name === 'Otro'));
   assert.match(result.text,/Piso\n[^\n]*Nuevo R1/);
   assert.doesNotMatch(result.text,/Senior R4/);
 });
@@ -127,7 +127,7 @@ test('las salas y el formato final siguen los ejemplos entregados', () => {
     torres: {room:'Q5',residents:R.parseResidents('Mendoza R4, Pérez R2, Paredes R1')}
   };
   const result = at(state,'2026-10-28');
-  assert.match(result.text,/QX 1 Dra\. Flores \/ Rotantes \/ Palencia R1/);
+  assert.match(result.text,/QX 1 Dra\. Flores \/ Rotantes \/ Hernández R2 \/ Palencia R1/);
   assert.match(result.text,/QX 5 Dr\. Torres \/ Rotantes \/ Pérez R2 \/ Paredes R1/);
   assert.ok(!result.groups.find(g => g.service === 'qx').support.some(person => person.name === 'Paredes'));
   assert.doesNotMatch(at(state,'2026-10-28','vespertino').text,/todos los R1 al terminar actividades/);

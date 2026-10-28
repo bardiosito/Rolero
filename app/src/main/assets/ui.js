@@ -116,8 +116,6 @@
   function hero(eyebrow, title, subtitle) {
     return '<section class="hero compact-hero"><h1>' + title + '</h1></section>';
   }
-  function absenceForDoctor(doctor, date) { return state.absences.slice().reverse().find(function (absence) { return absence.personType === 'doctor' && absence.personId === doctor.id && absence.start <= date && absence.end >= date; }); }
-  function dayOverride(doctorId) { return (state.dailyOverrides[ui.date] || {})[doctorId] || {}; }
   function generate() {
     var result = engine.generate(state, { date: ui.date, shift: ui.shift, includeGuards: state.settings.includeGuards, showDoctors: state.settings.showDoctors });
     var key = ui.date + '|' + ui.shift + '|' + revision;
@@ -143,12 +141,9 @@
   }
   function renderCreate() {
     var result = generate();
-    var doctors = state.doctors.filter(function (doctor) { return doctor.shift === ui.shift; });
-    var weekday = engine.weekdayIndex(ui.date);
     return hero('', 'Tu equipo, <span>en orden.</span>', '') +
       '<section class="card selection-card"><div class="selection-grid"><div><div class="field-title"><span>FECHA DEL ROL</span><button class="small-action" data-action="today">Hoy</button></div><label aria-label="Fecha del rol"><input type="date" id="create-date" value="' + h(ui.date) + '" required></label></div><div><div class="field-title">TURNO</div><div class="segmented" aria-label="Seleccionar turno"><button data-action="shift" data-shift="matutino" class="' + (ui.shift === 'matutino' ? 'active' : '') + '" aria-pressed="' + (ui.shift === 'matutino') + '">' + icon('sun') + 'Matutino</button><button data-action="shift" data-shift="vespertino" class="' + (ui.shift === 'vespertino' ? 'active' : '') + '" aria-pressed="' + (ui.shift === 'vespertino') + '">' + icon('moon') + 'Vespertino</button></div></div></div></section>' +
       renderPostGuard(result) +
-      '<details class="section-accordion" data-detail="organize-turn"><summary>Organiza el turno</summary><div class="accordion-content doctor-list">' + (doctors.length ? doctors.map(function (doctor) { return renderDayDoctor(doctor, weekday); }).join('') : '<div class="quiet-empty">No hay médicos en este turno.<button class="button soft space-top" data-action="tab" data-tab="equipo">Ir a Equipo</button></div>') + '</div></details>' +
       renderOperatingRooms() + '<section class="card preview-card" aria-label="Vista previa"><div class="preview-head"><h2>Vista previa</h2></div><div class="preview-controls"><label class="switch-row" for="floor-r1-switch"><span>Resto de R1 al terminar actividades</span><input type="checkbox" role="switch" id="floor-r1-switch" data-setting="floorR1Reminder"' + (state.settings.floorR1Reminder ? ' checked' : '') + '><span class="switch-track" aria-hidden="true"></span></label></div><div class="preview-text-wrap"><textarea id="preview-text" class="preview-text" aria-label="Texto del rol, editable" spellcheck="false">' + h(ui.preview) + '</textarea></div><div class="preview-footer">' + reportActions() + '</div></section>';
   }
   function operatingDoctorId(doctor) { return doctor.sourceDoctorId || doctor.id; }
@@ -176,29 +171,6 @@
     return '<div class="duty-summary" aria-label="Guardia y postguardia"><span>Guardia <strong>' + h(guard ? guard.name || guard.id : 'Sin seleccionar') + '</strong></span><span>Postguardia <strong>' + h(post ? post.name || post.id : 'Sin seleccionar') + '</strong></span></div>';
   }
 
-  function renderDayDoctor(doctor, weekday) {
-    var override = dayOverride(doctor.id);
-    var service = override.service || (weekday >= 0 ? doctor.schedule[weekday] : 'manual');
-    var residents = override.residents || doctor.residents || [];
-    var absence = absenceForDoctor(doctor, ui.date);
-    var assignment = typeof engine.resolveDoctorAssignment === 'function' ? engine.resolveDoctorAssignment(state, doctor.id, ui.date) : { doctor: doctor, covering: false };
-    var displayDoctor = assignment ? assignment.doctor : doctor;
-    var needsRoom = service === 'qx' && !engine.normalizeOperatingRoom(override.room);
-    var excluded = !!override.excluded || !assignment || needsRoom;
-    var postGuardKeys = new Set((ui.result && ui.result.postGuardExcluded || []).filter(function (person) { return Number(person.grade) <= 2; }).map(function (person) { return engine.personKey(person); }));
-    var postGuardResidents = state.settings.excludePostGuard !== false ? residents.filter(function (person) { return Number(person.grade) <= 2 && postGuardKeys.has(engine.personKey(person)); }) : [];
-    var generatedDoctor = (ui.result && ui.result.groups || []).reduce(function (list, group) { return list.concat(group.doctors); }, []).find(function (person) { return person.id === doctor.id; });
-    var visibleResidents = generatedDoctor ? generatedDoctor.residents : engine.availableResidents(state, residents, ui.date).filter(function (person) { return state.settings.excludePostGuard === false || Number(person.grade) >= 3 || !postGuardKeys.has(engine.personKey(person)); });
-    var detail = visibleResidents.length ? engine.formatResidents(visibleResidents) : 'Sin residentes disponibles';
-    if (assignment && assignment.covering) detail = 'Cubre a ' + doctorLabel(doctor) + ' · ' + detail;
-    if (postGuardResidents.length) detail += ' · Postguardia: ' + residentText(postGuardResidents);
-    if (needsRoom) detail = 'Elige una sala para incluirlo en este rol';
-    return '<details class="doctor-card' + (excluded ? ' is-excluded' : '') + '" data-detail="day-' + h(doctor.id) + '"><summary><span class="avatar">' + h(initials(doctor.name)) + '</span><span class="doctor-summary"><span class="doctor-name">' + h(doctorLabel(displayDoctor)) + '</span><div class="doctor-sub">' + h(absence && !(assignment && assignment.covering) ? 'Ausencia registrada · ' + (absence.note || 'No disponible') : override.excluded ? 'Excluido de este día' : detail) + '</div></span><span class="service-tag ' + h(service) + '">' + h(SHORT_SERVICES[service] || service) + '</span></summary><div class="doctor-fields">' +
-      (absence ? '<div class="info-banner warning-banner">' + icon('info') + '<div>Ausencia del ' + h(dateLabel(absence.start, { day: 'numeric', month: 'short' })) + ' al ' + h(dateLabel(absence.end, { day: 'numeric', month: 'short' })) + '. Puedes modificarla en Equipo.</div></div>' : '') +
-      (postGuardResidents.length ? '<div class="info-banner">' + icon('moon') + '<div><strong>' + h(residentText(postGuardResidents)) + '</strong>: se excluye' + (postGuardResidents.length > 1 ? 'n' : '') + ' del texto por postguardia. La combinación fija se conserva.</div></div>' : '') +
-      '<label>Actividad de este día<select data-day-doctor="' + h(doctor.id) + '" data-day-field="service">' + serviceOptions(service) + '</select></label>' + '<label class="check-row"><input type="checkbox" data-day-doctor="' + h(doctor.id) + '" data-day-field="excluded"' + (override.excluded ? ' checked' : '') + '>Excluir de este rol</label>' +
-      (Object.keys(override).length ? '<button class="small-action" data-action="reset-day" data-id="' + h(doctor.id) + '" style="text-align:left">Restablecer el rol fijo para este médico</button>' : '') + '</div></details>';
-  }
   function renderTeam() {
     return hero('', 'El equipo <span>completo.</span>', '') +
       '<div class="team-sections">' +
@@ -312,7 +284,8 @@
     var groups = state.guardGroups || [];
     var roster = residentRoster();
     var ungrouped = roster.filter(function (resident) { return !resident.guardGroupId; });
-    return hero('', 'Guardias', '') + '<section class="card guard-setup form-stack"><label>Guardia actual<select data-duty-field="guardGroupId" aria-label="Guardia actual">' + guardGroupOptions((state.dutySelection || {}).guardGroupId) + '</select></label><label>Fecha de esta guardia<input type="date" id="duty-reference-date" data-duty-field="referenceDate" value="' + h((state.dutySelection || {}).referenceDate || localDate()) + '" required></label><label>Número de guardias<select id="guard-count" aria-label="Número de guardias">' + [3, 4, 5, 6].map(function (number) { return '<option value="' + number + '"' + (groups.length === number ? ' selected' : '') + '>' + number + '</option>'; }).join('') + '</select></label></section><div class="guard-groups-grid">' + groups.map(function (group) { return renderGuardGroup(group, roster); }).join('') + '</div>' + (ungrouped.length ? '<details class="section-accordion" data-detail="residents-ungrouped"><summary>Residentes sin guardia</summary><div class="accordion-content doctor-list">' + ungrouped.map(renderResident).join('') + '</div></details>' : '');
+    var currentGroup = engine.resolveGuards(state, localDate()).group;
+    return hero('', 'Guardias', '') + '<section class="card guard-setup form-stack"><label>Guardia actual<select data-duty-field="guardGroupId" aria-label="Guardia actual">' + guardGroupOptions(currentGroup) + '</select></label><label>Número de guardias<select id="guard-count" aria-label="Número de guardias">' + [3, 4, 5, 6].map(function (number) { return '<option value="' + number + '"' + (groups.length === number ? ' selected' : '') + '>' + number + '</option>'; }).join('') + '</select></label></section><div class="guard-groups-grid">' + groups.map(function (group) { return renderGuardGroup(group, roster); }).join('') + '</div>' + (ungrouped.length ? '<details class="section-accordion" data-detail="residents-ungrouped"><summary>Residentes sin guardia</summary><div class="accordion-content doctor-list">' + ungrouped.map(renderResident).join('') + '</div></details>' : '');
   }
   function renderGuardGroup(group, roster) {
     var members = roster.filter(function (resident) { return resident.guardGroupId === group.id; });
@@ -428,7 +401,6 @@
     else if (action === 'export') exportBackup();
     else if (action === 'import') requestImport();
     else if (action === 'confirm-import' && pendingImport) { state = pendingImport; pendingImport = null; ui.absenceDraft = { doctorId: '', coverDoctorId: '', residentId: '', start: '', end: '', note: '' }; save(); closeModal(); render(); toast('Respaldo restaurado.'); }
-    else if (action === 'reset-day') { if (state.dailyOverrides[ui.date]) delete state.dailyOverrides[ui.date][button.dataset.id]; save(); render(); toast('Se restableció la asignación fija.'); }
     else if (action === 'delete-absence') { state.absences = state.absences.filter(function (absence) { return absence.id !== button.dataset.id; }); save(); render(); toast('Ausencia eliminada.'); }
     else if (action === 'delete-doctor') {
       var doctor = state.doctors.find(function (person) { return person.id === button.dataset.id; });
@@ -470,20 +442,9 @@
         if (!engine.validDateRange(input.value, input.value)) throw new Error('Elige una fecha válida entre 1900 y 2200.');
         ui.date = input.value; render();
       } else if (input.dataset.setting) { state.settings[input.dataset.setting] = input.type === 'checkbox' ? input.checked : input.value; save(); render(); }
-      else if (input.dataset.dayDoctor) {
-        var doctorId = input.dataset.dayDoctor;
-        var field = input.dataset.dayField;
-        var value = field === 'excluded' ? input.checked : input.value;
-        state.dailyOverrides[ui.date] = state.dailyOverrides[ui.date] || {};
-        var override = state.dailyOverrides[ui.date][doctorId] = state.dailyOverrides[ui.date][doctorId] || {};
-        override[field] = value;
-        if (field === 'service') { delete override.operatingRoomPrevious; if (value !== 'qx') { delete override.room; delete override.roomOrder; } }
-        save(); render();
-      } else if (input.id === 'guard-count') changeGroupCount(Number(input.value), false);
+      else if (input.id === 'guard-count') changeGroupCount(Number(input.value), false);
       else if (input.dataset.dutyField) {
-        var guardSelection = app.querySelector('[data-duty-field="guardGroupId"]');
-        var referenceDate = document.getElementById('duty-reference-date');
-        engine.setDutyReference(state, guardSelection.value, referenceDate.value); save(); render();
+        engine.setDutyReference(state, input.value, localDate()); save(); render();
       }
       else if (input.id === 'backup-file' && input.files && input.files[0]) {
         var file = input.files[0];

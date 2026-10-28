@@ -87,7 +87,8 @@ test('un alta nueva con médicos por turno se guarda y aparece en el rol de cada
   assert.ok(member(restored, 'B', key('Nuevo Residente', 2)));
   assert.ok(has(restored.doctors.find(doctor => doctor.id === 'tm-b').residents, key('Nuevo Residente', 2)));
   assert.ok(has(restored.doctors.find(doctor => doctor.id === 'tv-b').residents, key('Nuevo Residente', 2)));
-  assert.match(at(restored, '2026-10-29').text, /Dra\. Médico Dos \/ Beta R2 \/ Nuevo Residente R2/);
+  assert.match(at(restored, '2026-10-29').text, /Dr\. Médico Uno \/ Rotantes \/ Nuevo Residente R2/);
+  assert.match(at(restored, '2026-10-29').text, /Dra\. Médico Dos \/ Beta R2/);
   assert.match(at(restored, '2026-10-29', 'vespertino').text, /Dr\. Médico Cuatro \/ Nuevo Residente R2/);
 });
 

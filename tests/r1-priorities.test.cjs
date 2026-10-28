@@ -50,7 +50,7 @@ test('ausencia y postguardia excluyen al R1; cobertura conserva el destino de or
  s.absences=[];R.setGuardGroupMembers(s,'D',[p('Uno')]);assert.equal(occurrences(at(s),'Uno').length,0);
 });
 test('relevo de un R1 configurado cubre su nuevo médico y no su ubicación anterior',()=>{
- const s=fresh();R.setGuardGroupMembers(s,'D',[p('Uno')]);R.setGuardGroupMembers(s,'A',[p('Relevo',2)]);R.setMobileAssignment(s,'matutino',{residentKey:'relevo|R2',fixedResidentKey:'uno|R1'});R.setR1Priorities(s,'uno|R1','matutino',['doctor:b']);
+ const s=fresh();s.doctors.find(d=>d.id==='b').residents=[];R.setGuardGroupMembers(s,'D',[p('Uno')]);R.setGuardGroupMembers(s,'A',[p('Relevo',2)]);R.setMobileAssignment(s,'matutino',{residentKey:'relevo|R2',fixedResidentKey:'uno|R1'});R.setR1Priorities(s,'uno|R1','matutino',['doctor:b']);
  const result=at(s);assert.equal(occurrences(result,'Uno').length,0);assert.ok(doctor(result,'b').residents.some(p=>p.name==='Relevo'&&p.mobile));assert.ok(!doctor(result,'a').residents.some(p=>p.name==='Relevo'));
 });
 test('los R1 móviles mantienen reserva y sustituciones antes que el destino nuevo',()=>{

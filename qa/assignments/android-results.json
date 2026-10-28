@@ -1,0 +1,19 @@
+{
+  "version": "1.7.0",
+  "device": "emulator-5554",
+  "apk": "C:\\Users\\bardiostudio\\Documents\\rolero\\dist\\Rolero-debug.apk",
+  "passed": [
+    "Misma sala conserva líneas, equipos y orden de incorporación al mover y recargar",
+    "Equipo configura un destino y médico por turno, reparte servicios y permite conservar el rol anterior",
+    "Ausencias, postguardia, cobertura y relevos respetan el destino del R1",
+    "Médico sin sala queda fuera sólo del rol; sus R2 se redistribuyen y los R1 conservan su sala",
+    "Los R2 llenan vacantes de QX, Consulta y Urgencias; el resto queda como Apoyo QX",
+    "Guardia actual toma la fecha del sistema, conserva el ancla y calcula la postguardia al consultar otro día",
+    "Orden y destinos sobreviven a respaldo, edición del otro turno y recarga",
+    "Destinos y orden QX persisten al cerrar y reabrir"
+  ],
+  "errors": [],
+  "cleanupErrors": [],
+  "failure": null,
+  "success": true
+}

@@ -97,7 +97,9 @@ test('Piso con un médico y residentes recibe el aviso sin reemplazar su equipo'
   const result = at(state);
   const floor = result.groups.find(group => group.service === 'piso');
   assert.equal(floor.doctors[0].id, 'cerda');
-  assert.match(result.text.split('\n\nPiso\n')[1], /Dra\. Cerda \/ Rotantes \/ Ibarra R2 \/ Chávez R1/);
+  assert.match(result.text.split('\n\nPiso\n')[1], /Dra\. Cerda \/ Rotantes \/ Chávez R1/);
+  assert.ok(!allResidents({groups:[floor]}).some(person => person.grade === 2));
+  assert.ok(allResidents(result).some(person => person.name === 'Ibarra' && person.grade === 2));
   assert.equal(result.text.split(reminder).length - 1, 1);
 });
 
