@@ -357,13 +357,15 @@ function balanceR1Coverage(state,date,shift,groups){
   const targets=targetsFor(person,shift),explicit=(roster.get(person.key)||{configured:{}}).configured[shift],doctorMatch=targets.some(target=>target.startsWith('doctor:')&&unit.doctors.some(doctor=>doctor.id===target.slice(7)));
   if(person.person.mobile&&person.positions.some(position=>position.doctor&&unit.doctors.includes(position.doctor)))return 0;
   if(explicit&&doctorMatch)return 0;
-  if(unit.service==='qx'&&r1RoomFor(state,person.key,shift,date)===unit.room&&targets.some(target=>targetService(target)==='qx'))return 1;
-  if(doctorMatch)return 2;
-  if(targets.some(target=>targetService(target)===unit.service))return 3;
-  if(unit.service==='qx'&&targetsFor(person,shift==='matutino'?'vespertino':'matutino').some(target=>targetService(target)==='qx'))return 4;
-  return 5;
+  const room=r1RoomFor(state,person.key,shift,date),serviceMatch=targets.some(target=>targetService(target)===unit.service);
+  if(explicit&&serviceMatch)return unit.service==='qx'&&room!==unit.room&&units.some(item=>item.service==='qx'&&item.room===room)?2:1;
+  if(unit.service==='qx'&&room===unit.room&&serviceMatch)return 3;
+  if(doctorMatch)return 4;
+  if(serviceMatch)return 5;
+  if(unit.service==='qx'&&targetsFor(person,shift==='matutino'?'vespertino':'matutino').some(target=>targetService(target)==='qx'))return 6;
+  return 7;
  };
- for(let priority=0;priority<=5;priority++)units.filter(unit=>!unit.assigned).forEach(unit=>{
+ for(let priority=0;priority<=7;priority++)units.filter(unit=>!unit.assigned).forEach(unit=>{
   const person=Array.from(people.values()).find(person=>score(person,unit)<=priority);if(!person)return;
   const targets=targetsFor(person,shift),preferred=targets.find(target=>target.startsWith('doctor:')&&unit.doctors.some(doctor=>doctor.id===target.slice(7))),previous=person.positions.find(position=>position.doctor&&unit.doctors.includes(position.doctor));
   const doctor=person.person.mobile&&previous?previous.doctor:preferred?unit.doctors.find(doctor=>doctor.id===preferred.slice(7)):previous?previous.doctor:unit.doctors.find(doctor=>doctor.residents.some(resident=>resident.grade===2))||unit.doctors[0];

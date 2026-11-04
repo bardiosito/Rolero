@@ -208,7 +208,7 @@
     var draft = ui.absenceDraft;
     var type = ui.absenceType;
     return '<details class="section-accordion" data-detail="absences"><summary>Vacaciones y ausencias</summary><div class="accordion-content"><form id="add-absence" class="form-stack" data-person-type="' + type + '"><div class="segmented absence-mode" aria-label="Tipo de persona"><label class="' + (type === 'doctor' ? 'active' : '') + '"><input type="radio" name="personType" value="doctor"' + (type === 'doctor' ? ' checked' : '') + '>Médico</label><label class="' + (type === 'resident' ? 'active' : '') + '"><input type="radio" name="personType" value="resident"' + (type === 'resident' ? ' checked' : '') + '>Residente</label></div>' +
-      (type === 'doctor' ? absenceDoctorSelector('doctor', 'Quién sale', draft.doctorId, false) + absenceDoctorSelector('cover', 'Quién cubre', draft.coverDoctorId, true) : '<label>Residente<select name="residentId" required><option value="">Seleccionar residente</option>' + allResidents().map(function (resident) { var key = engine.personKey(resident); return '<option value="' + h(key) + '"' + (key === draft.residentId ? ' selected' : '') + '>' + h(resident.name + ' R' + resident.grade) + '</option>'; }).join('') + '</select></label>') +
+      (type === 'doctor' ? absenceDoctorSelector('doctor', 'Quién sale', draft.doctorId, false) + absenceDoctorSelector('cover', 'Quién cubre', draft.coverDoctorId, true) : '<label>Residente<select name="residentId" required><option value="">Seleccionar residente</option>' + allResidents().filter(function (resident) { return Number(resident.grade) <= 2; }).map(function (resident) { var key = engine.personKey(resident); return '<option value="' + h(key) + '"' + (key === draft.residentId ? ' selected' : '') + '>' + h(resident.name + ' R' + resident.grade) + '</option>'; }).join('') + '</select></label>') +
       '<div class="form-grid"><label>Desde<input type="date" name="start" value="' + h(draft.start || ui.date) + '" required></label><label>Hasta<input type="date" name="end" value="' + h(draft.end || ui.date) + '" required></label></div><label>Motivo (opcional)<input name="note" value="' + h(draft.note) + '" placeholder="Ej. Vacaciones" maxlength="120"></label><button type="submit" class="button soft full">Registrar ausencia</button></form>' + (state.absences.length ? '<div class="absence-list">' + state.absences.slice().sort(function (a, b) { return a.start.localeCompare(b.start); }).map(renderAbsence).join('') + '</div>' : '') + '</div></details>';
   }
 
@@ -255,18 +255,35 @@
   function gradeOptions(grade) {
     return [1, 2].map(function (number) { return '<option value="' + number + '"' + (Number(grade) === number ? ' selected' : '') + '>R' + number + '</option>'; }).join('');
   }
+  function residentShiftRole(resident, shift) {
+    var policy = resident && Number(resident.grade) === 1 && (state.r1Priorities || {})[resident.key];
+    if (!policy || !Object.prototype.hasOwnProperty.call(policy, shift)) return null;
+    var labels = (policy[shift].length ? policy[shift] : ['service:piso']).map(function (target) {
+      if (target.indexOf('doctor:') === 0) {
+        var doctor = state.doctors.find(function (person) { return person.id === target.slice(7); });
+        return doctor ? doctorLabel(doctor) : 'Piso';
+      }
+      var service = SERVICES.find(function (item) { return item[0] === target.slice(8); });
+      return service ? service[1] : 'Piso';
+    });
+    return labels.join(' → ');
+  }
   function residentDoctorSummary(resident) {
     var labels = ['matutino', 'vespertino'].map(function (shift) {
+      var role = residentShiftRole(resident, shift);
+      if (role !== null) return (shift === 'matutino' ? 'TM: ' : 'TV: ') + role;
       var ids = (resident.doctorIds || {})[shift] || [];
       var names = state.doctors.filter(function (doctor) { return ids.includes(doctor.id); }).map(doctorLabel);
+      if (Number(resident.grade) === 1 && !names.length) names = (state.serviceRules || []).filter(function (rule) { return rule.shift === shift && (resident.serviceRuleIds || []).includes(rule.id); }).map(function (rule) { var service = SERVICES.find(function (item) { return item[0] === rule.service; }); return service ? service[1] : ''; }).filter(Boolean);
       return names.length ? (shift === 'matutino' ? 'TM: ' : 'TV: ') + names.join(', ') : '';
     }).filter(Boolean);
-    if ((resident.serviceRuleIds || []).length) labels.push('Apoyo por servicio');
     return labels.join(' · ') || 'Sin médico asignado';
   }
-  function renderResidentAssignments(detailKey, doctorIds) {
+  function renderResidentAssignments(detailKey, doctorIds, resident) {
     var encoded = encodeURIComponent(detailKey);
-    return '<details class="resident-assignments" data-detail="assignment-' + h(encoded) + '"><summary>Médicos por turno</summary><div class="assignment-shifts">' + ['matutino', 'vespertino'].map(function (shift) {
+    return '<details class="resident-assignments" data-detail="assignment-' + h(encoded) + '"><summary>' + (resident && Number(resident.grade) === 1 ? 'Rol por turno' : 'Médicos por turno') + '</summary><div class="assignment-shifts">' + ['matutino', 'vespertino'].map(function (shift) {
+      var role = residentShiftRole(resident, shift);
+      if (role !== null) return '<details class="person-shift" data-detail="assignment-' + h(encoded) + '-' + shift + '"><summary>' + cap(shift) + '</summary><div class="form-stack"><p class="small-caption" data-resident-role="' + shift + '">Rol de R1: <strong>' + h(role) + '</strong></p><button type="button" class="button soft small" data-action="edit-r1-role" data-key="' + h(resident.key) + '" data-shift="' + shift + '">Editar en Equipo</button></div></details>';
       var doctors = state.doctors.filter(function (doctor) { return doctor.shift === shift; });
       var selected = (doctorIds || {})[shift] || [];
       return '<details class="person-shift" data-detail="assignment-' + h(encoded) + '-' + shift + '"><summary>' + cap(shift) + '</summary><div>' + (doctors.length ? doctors.map(function (doctor) { return '<label class="check-row resident-doctor-option"><input type="checkbox" name="doctor-' + shift + '" value="' + h(doctor.id) + '"' + (selected.includes(doctor.id) ? ' checked' : '') + '>' + h(doctorLabel(doctor)) + '</label>'; }).join('') : '<p class="small-caption">Sin médicos en este turno.</p>') + '</div></details>';
@@ -274,7 +291,7 @@
   }
   function renderResident(resident) {
     var key = h(resident.key);
-    return '<details class="doctor-card resident-card" data-detail="resident-' + h(encodeURIComponent(resident.key)) + '"><summary><span class="resident-grade">R' + resident.grade + '</span><span class="doctor-summary"><span class="doctor-name">' + h(resident.name) + '</span><div class="doctor-sub">' + h(residentDoctorSummary(resident)) + '</div></span></summary><div class="doctor-fields"><form class="form-stack" data-form="resident" data-key="' + key + '"><div class="form-grid"><label>Nombre<input name="name" value="' + h(resident.name) + '" required maxlength="90"></label><label>Grado<select name="grade">' + gradeOptions(resident.grade) + '</select></label></div><label>Guardia<select name="guardGroupId"><option value=""' + (!resident.guardGroupId ? ' selected' : '') + '>Sin guardia</option>' + guardGroupOptions(resident.guardGroupId) + '</select></label>' + renderResidentAssignments(resident.key, resident.doctorIds) + '<button class="button soft full" type="submit">' + icon('check') + 'Guardar residente</button><div class="resident-actions"><button type="button" class="button secondary small" data-action="promote-resident" data-key="' + key + '">Ascender a R' + (Number(resident.grade) + 1) + '</button><button type="button" class="delete-link" data-action="remove-resident" data-key="' + key + '">Quitar residente</button></div></form></div></details>';
+    return '<details class="doctor-card resident-card" data-detail="resident-' + h(encodeURIComponent(resident.key)) + '"><summary><span class="resident-grade">R' + resident.grade + '</span><span class="doctor-summary"><span class="doctor-name">' + h(resident.name) + '</span><div class="doctor-sub">' + h(residentDoctorSummary(resident)) + '</div></span></summary><div class="doctor-fields"><form class="form-stack" data-form="resident" data-key="' + key + '"><div class="form-grid"><label>Nombre<input name="name" value="' + h(resident.name) + '" required maxlength="90"></label><label>Grado<select name="grade">' + gradeOptions(resident.grade) + '</select></label></div><label>Guardia<select name="guardGroupId"><option value=""' + (!resident.guardGroupId ? ' selected' : '') + '>Sin guardia</option>' + guardGroupOptions(resident.guardGroupId) + '</select></label>' + renderResidentAssignments(resident.key, resident.doctorIds, resident) + '<button class="button soft full" type="submit">' + icon('check') + 'Guardar residente</button><div class="resident-actions"><button type="button" class="button secondary small" data-action="promote-resident" data-key="' + key + '">Ascender a R' + (Number(resident.grade) + 1) + '</button><button type="button" class="delete-link" data-action="remove-resident" data-key="' + key + '">Quitar residente</button></div></form></div></details>';
   }
   function renderAddResident(group, roster) {
     var existing = roster.filter(function (resident) { return !resident.guardGroupId; });
@@ -296,7 +313,11 @@
     if (!resident) return;
     openModal(promotion ? 'Ascender a R3 y retirar' : 'Quitar residente', '<p>' + (promotion ? 'Al pasar a R3, ' : 'Se retirará a ') + '<strong>' + h(resident.name + ' R' + resident.grade) + '</strong>' + (promotion ? ' se retirará de todos los turnos y guardias.' : ' de todos los turnos y guardias.') + '</p><div class="action-row"><button class="button secondary" data-action="close-modal">Cancelar</button><button class="button danger" data-action="confirm-retire-resident" data-key="' + h(key) + '">' + (promotion ? 'Ascender y retirar' : 'Quitar residente') + '</button></div>');
   }
-  function formDoctorIds(form) { return { matutino: form.getAll('doctor-matutino'), vespertino: form.getAll('doctor-vespertino') }; }
+  function formDoctorIds(form, resident) {
+    var doctorIds = {};
+    ['matutino', 'vespertino'].forEach(function (shift) { if (residentShiftRole(resident, shift) === null) doctorIds[shift] = form.getAll('doctor-' + shift); });
+    return doctorIds;
+  }
   function rememberResidentDetails(oldKey, newKey) {
     var oldEncoded = encodeURIComponent(oldKey);
     var newEncoded = encodeURIComponent(newKey);
@@ -376,6 +397,14 @@
     var action = button.dataset.action;
     if (action === 'tab') { ui.tab = button.dataset.tab; render(); window.scrollTo(0, 0); }
     else if (action === 'shift') { ui.shift = button.dataset.shift; render(); }
+    else if (action === 'edit-r1-role') {
+      var encoded = encodeURIComponent(button.dataset.key);
+      ui.tab = 'equipo';
+      ['r1-priorities', 'r1-priority-' + encoded, 'r1-priority-' + encoded + '-' + button.dataset.shift].forEach(function (key) { ui.detailStates[key] = true; });
+      render();
+      var roleForm = Array.from(app.querySelectorAll('[data-form="r1-priorities"]')).find(function (form) { return form.dataset.key === button.dataset.key && form.dataset.shift === button.dataset.shift; });
+      if (roleForm) roleForm.scrollIntoView({ block: 'center' });
+    }
     else if (action === 'today') { ui.date = localDate(); render(); }
     else if (action === 'copy' || action === 'share') publish(action);
     else if (action === 'add-doctor') showAddDoctor(button.dataset.shift);
@@ -503,7 +532,8 @@
         else { entry.name = String(form.get('name') || '').trim(); entry.grade = Number(form.get('grade')); entry.doctorIds = formDoctorIds(form); }
         engine.addResident(state, entry); save(); render(); toast('Integrante añadido.');
       } else if (element.dataset.form === 'resident') {
-        var residentUpdate = { name: String(form.get('name') || '').trim(), grade: Number(form.get('grade')), guardGroupId: String(form.get('guardGroupId') || ''), doctorIds: formDoctorIds(form) };
+        var beforeUpdate = residentRoster().find(function (resident) { return resident.key === element.dataset.key; });
+        var residentUpdate = { name: String(form.get('name') || '').trim(), grade: Number(form.get('grade')), guardGroupId: String(form.get('guardGroupId') || ''), doctorIds: formDoctorIds(form, beforeUpdate) };
         engine.updateResident(state, element.dataset.key, residentUpdate);
         rememberResidentDetails(element.dataset.key, engine.personKey(residentUpdate));
         save(); render(); toast('Residente guardado.');

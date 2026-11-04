@@ -40,7 +40,7 @@ test('la sala compartida recibe un R1 y los sobrantes quedan en Piso sin Apoyo',
  const s=fresh();R.addResident(s,{name:'Libre',grade:1,guardGroupId:'A'});R.addResident(s,{name:'Piso',grade:1,guardGroupId:'A'});
  R.setOperatingRoom(s,{date,shift:'matutino',doctorId:'a',room:1});R.setOperatingRoom(s,{date,shift:'matutino',doctorId:'b',room:1});
  R.setR1Priorities(s,'libre|R1','matutino',['service:qx']);R.setR1Priorities(s,'piso|R1','matutino',['service:piso']);
- const result=at(s);assert.equal(result.groups.find(g=>g.service==='qx').doctors.flatMap(d=>d.residents).filter(p=>p.grade===1).length,1);assert.ok(result.groups.find(g=>g.service==='piso').support.some(p=>p.name==='Libre'));assert.ok(result.groups.find(g=>g.service==='piso').support.some(p=>p.name==='Piso'));assert.doesNotMatch(result.text,/Apoyo/);assert.equal(occurrences(result,'Libre').length,1);
+ const result=at(s);assert.equal(result.groups.find(g=>g.service==='qx').doctors.flatMap(d=>d.residents).filter(p=>p.grade===1).length,1);assert.ok(result.groups.find(g=>g.service==='qx').doctors.some(d=>d.residents.some(p=>p.name==='Libre')));assert.ok(result.groups.find(g=>g.service==='piso').support.some(p=>p.name==='Uno'));assert.ok(result.groups.find(g=>g.service==='piso').support.some(p=>p.name==='Piso'));assert.doesNotMatch(result.text,/Apoyo/);assert.equal(occurrences(result,'Libre').length,1);
 });
 test('ausencia y postguardia excluyen al R1; cobertura conserva el origen y falta de médico cubre otro servicio',()=>{
  const s=fresh();R.setR1Priorities(s,'uno|R1','matutino',['doctor:a']);s.absences=[{id:'x',personType:'doctor',personId:'a',coverDoctorId:'b',start:date,end:date}];
