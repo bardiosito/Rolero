@@ -1,0 +1,13 @@
+{
+  "version": "1.9.0",
+  "device": "emulator-5564",
+  "apk": "C:\\Users\\bardiostudio\\Documents\\rolero\\dist\\Rolero-debug.apk",
+  "passed": [],
+  "errors": [],
+  "cleanupErrors": [],
+  "failure": {
+    "message": "page.reload: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"load\"\u001b[22m\n",
+    "stack": "page.reload: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"load\"\u001b[22m\n\n    at C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\ui.guard-sync.smoke.cjs:25:41\n    at async check (C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:12:64)\n    at async flow (C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\ui.guard-sync.smoke.cjs:21:2)\n    at async C:\\Users\\bardiostudio\\Documents\\rolero\\tests\\android.smoke.cjs:19:2"
+  },
+  "success": false
+}

@@ -1,0 +1,17 @@
+{
+  "version": "1.9.0",
+  "method": "native-instrumentation",
+  "passed": [],
+  "failures": [
+    {
+      "message": "La prueba nativa no devolvió un resultado completo."
+    }
+  ],
+  "originalRestored": false,
+  "success": false,
+  "device": "emulator-5564",
+  "avd": "Small_Phone",
+  "androidApi": "37",
+  "runnerExitCode": 0,
+  "apkSha256": "1c6d9ecbbe1e4e7712a74f17505b8599bfe6f4c57eb14c462f039fd66b73800e"
+}

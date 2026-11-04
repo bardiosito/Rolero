@@ -1,0 +1,12 @@
+{
+  "version": "1.9.0",
+  "method": "native-instrumentation",
+  "passed": [],
+  "failures": [
+    {
+      "message": "La prueba nativa no devolvió un resultado completo."
+    }
+  ],
+  "originalRestored": false,
+  "success": false
+}

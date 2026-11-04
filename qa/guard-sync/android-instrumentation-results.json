@@ -1,0 +1,20 @@
+{
+  "version": "1.9.0",
+  "method": "native-instrumentation",
+  "passed": [
+    "Equipo offers only R1/R2 and preserves Rotantes",
+    "Explicit R1 roles have priority and appear in Guardias for both shifts",
+    "Changing resident name/group preserves roles, base pairings and Activity persistence",
+    "Copy button writes the exact preview to the native Android clipboard"
+  ],
+  "failures": [],
+  "originalRestored": true,
+  "restoreOnly": false,
+  "success": true,
+  "device": "emulator-5564",
+  "avd": "Small_Phone",
+  "androidApi": "37",
+  "provider": "Current WebView package (name, version): (com.google.android.webview, 156.0.8078.47)",
+  "runnerExitCode": 0,
+  "apkSha256": "1c6d9ecbbe1e4e7712a74f17505b8599bfe6f4c57eb14c462f039fd66b73800e"
+}

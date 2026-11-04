@@ -1,0 +1,82 @@
+INSTRUMENTATION_STATUS: stream=
+Launching the target Activity.
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+Waiting for target Activity focus before UI actions.
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+Original data restored and verified before fixtures.
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":".bottom-nav [data-tab='equipo']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":568,"height":55.5,"left":130.6640625,"right":229.3359375,"top":512.5,"width":98.671875},"scrollX":0,"scrollY":0,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":180,"y":540.25},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":360,"nativeY":1128.5,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"unavailable:null-root"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":"details[data-detail='absences'] > summary","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":329.859375,"height":54,"left":15,"right":345,"top":275.859375,"width":330},"scrollX":0,"scrollY":0,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":180,"y":302.859375},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":360,"nativeY":653.71875,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":"#add-absence label:has(input[name='personType'][value='resident'])","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":387.859375,"height":40,"left":182.5,"right":327,"top":347.859375,"width":144.5},"scrollX":0,"scrollY":0,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":254.75,"y":367.859375},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":509.5,"nativeY":783.71875,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":".bottom-nav [data-tab='crear']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":568,"height":55.5,"left":14,"right":112.6640625,"top":512.5,"width":98.6640625},"scrollX":0,"scrollY":0,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":63.33203125,"y":540.25},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":126.6640625,"nativeY":1128.5,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+PASS native: Equipo offers only R1/R2 and preserves Rotantes
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":".bottom-nav [data-tab='equipo']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":568,"height":55.5,"left":130.6640625,"right":229.3359375,"top":512.5,"width":98.671875},"scrollX":0,"scrollY":0,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":180,"y":540.25},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":360,"nativeY":1128.5,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":"[data-form='r1-priorities'][data-key='uno|R1'][data-shift='matutino'] [type='submit']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":325.875,"height":44,"left":54,"right":306,"top":281.875,"width":252},"scrollX":0,"scrollY":938,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":180,"y":303.875},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":360,"nativeY":655.75,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":"[data-form='r1-priorities'][data-key='uno|R1'][data-shift='vespertino'] [type='submit']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":386.0625,"height":44,"left":54,"right":306,"top":342.0625,"width":252},"scrollX":0,"scrollY":1163,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":180,"y":364.0625},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":360,"nativeY":776.125,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":".bottom-nav [data-tab='guardias']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":568,"height":55.5,"left":247.3359375,"right":346,"top":512.5,"width":98.6640625},"scrollX":0,"scrollY":1163,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":296.66796875,"y":540.25},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":593.3359375,"nativeY":1128.5,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+PASS native: Explicit R1 roles have priority and appear in Guardias for both shifts
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":"[data-form='resident'][data-key='uno|R1'] [type='submit']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":318.125,"height":44,"left":41,"right":319,"top":274.125,"width":278},"scrollX":0,"scrollY":876,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":180,"y":296.125},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":360,"nativeY":640.25,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+Waiting for target Activity focus before UI actions.
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":".bottom-nav [data-tab='guardias']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":568,"height":55.5,"left":247.3359375,"right":346,"top":512.5,"width":98.6640625},"scrollX":0,"scrollY":0,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":296.66796875,"y":540.25},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":593.3359375,"nativeY":1128.5,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+PASS native: Changing resident name/group preserves roles, base pairings and Activity persistence
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":".bottom-nav [data-tab='crear']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":568,"height":55.5,"left":14,"right":112.6640625,"top":512.5,"width":98.6640625},"scrollX":0,"scrollY":0,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":63.33203125,"y":540.25},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":126.6640625,"nativeY":1128.5,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+TAP {"selector":".preview-card [data-action='copy']","css":{"devicePixelRatio":2,"enabled":true,"height":592,"hit":true,"rect":{"bottom":421.8984375,"height":44,"left":32,"right":175.5,"top":377.8984375,"width":143.5},"scrollX":0,"scrollY":455.5,"visualViewport":{"height":592,"offsetLeft":0,"offsetTop":0,"scale":1,"width":360},"width":360,"x":103.75,"y":399.8984375},"webViewOriginX":0,"webViewOriginY":48,"webViewWidth":720,"webViewHeight":1184,"scale":2,"nativeX":207.5,"nativeY":847.796875,"visibleFrame":"[0,48][720,1232]","activityHasWindowFocus":true,"webViewHasWindowFocus":true,"displayId":0,"activeRootPackage":"mx.rolero.app"}
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: stream=
+PASS native: Copy button writes the exact preview to the native Android clipboard
+
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: shortMsg=Process crashed.
+INSTRUMENTATION_CODE: 0

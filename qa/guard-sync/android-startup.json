@@ -1,0 +1,31 @@
+{
+  "version": "1.9.0",
+  "device": "emulator-5564",
+  "avd": "Small_Phone",
+  "androidApi": "37",
+  "status": "ready",
+  "success": true,
+  "apkInstalled": true,
+  "testSuiteStarted": true,
+  "testExit": 0,
+  "reason": null,
+  "emulatorExit": null,
+  "logs": [
+    "C:\\Users\\bardiostudio\\Documents\\rolero\\build\\emulator-guard-sync-instrumentation-stdout.log",
+    "C:\\Users\\bardiostudio\\Documents\\rolero\\build\\emulator-guard-sync-instrumentation-stderr.log"
+  ],
+  "options": [
+    "-no-window",
+    "-no-audio",
+    "-no-snapshot-save",
+    "-no-boot-anim",
+    "-gpu",
+    "host",
+    "-cores",
+    "2",
+    "-memory",
+    "4096",
+    "-feature",
+    "-Vulkan"
+  ]
+}
